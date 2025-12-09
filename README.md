@@ -8,7 +8,7 @@ survey-platform/
    views.py        # Logika (kto co może widzieć)  
    urls.py         # Routing API  
    core/               # Ustawienia główne (settings.py)  
-  manage.py           # "Pilot" do zarządzania Django  
+  manage.py           # zarządzanie Django  
   
 frontend/               # Klient (React)  
 src/  
@@ -24,13 +24,7 @@ src/
 
 Backend wystawia dane pod adresem http://127.0.0.1:8000/api/.
 
-Metoda
-
-Endpoint
-
-Opis
-
-Wymaga Logowania?
+Metoda Endpoint Opis Wymaga Logowania?
 
 POST
 
