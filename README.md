@@ -69,6 +69,10 @@ POST
 Oddanie głosu
 
 ❌ Nie
+POST
+/api/register
+dodanie uzytkownika z dodaniem mu jego klucza (brakuje walidacji)
+❌ Nie
 
 przykładowy link publiczny
 
