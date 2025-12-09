@@ -1,3 +1,7 @@
+jak odpalić backend
+z venv
+python manage.py runserver
+
 📂 Struktura Projektu
 
 survey-platform/  
