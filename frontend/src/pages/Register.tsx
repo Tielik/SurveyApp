@@ -2,42 +2,36 @@ import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
 
-export default function Login() {
+export default function Register() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const navigate = useNavigate()
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleRegister = (e: React.FormEvent) => {
         e.preventDefault()
-        // Wysyłamy login i hasło do Django
-        axios.post('http://127.0.0.1:8000/api-token-auth/', {
+
+        // Wysyłamy prośbę o utworzenie konta
+        axios.post('http://127.0.0.1:8000/api/register/', {
             username: username,
             password: password
         })
-            .then(response => {
-                //  Dostaliśmy token
-                const token = response.data.token
-                console.log("Twój token:", token)
-
-                // Zapisujemy token w przeglądarce
-                localStorage.setItem('token', token)
-
-                // Przekierowujemy do panelu głównego
-                navigate('/dashboard')
+            .then(() => {
+                alert("Konto utworzone! Możesz się zalogować.")
+                navigate('/') // Przekieruj do logowania
             })
             .catch(err => {
-                setError("Błędny login lub hasło!")
                 console.error(err)
+                setError("Błąd rejestracji. Może taki użytkownik już istnieje?")
             })
     }
 
     return (
-        <div className="flex justify-center items-center h-screen bg-gray-100">
-            <form onSubmit={handleLogin} className="bg-white p-8 rounded-lg shadow-md w-96">
-                <h1 className="text-2xl font-bold mb-6 text-center">Zaloguj się</h1>
+        <div className="flex justify-center items-center h-screen bg-gray-100 font-sans">
+            <form onSubmit={handleRegister} className="bg-white p-8 rounded-lg shadow-md w-96">
+                <h1 className="text-2xl font-bold mb-6 text-center text-green-600">Załóż konto</h1>
 
-                {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+                {error && <p className="text-red-500 mb-4 text-center text-sm">{error}</p>}
 
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2">Login</label>
@@ -58,12 +52,14 @@ export default function Login() {
                         onChange={e => setPassword(e.target.value)}
                     />
                 </div>
-                <p className="text-center text-sm mt-4">
-                    Nie masz konta? <Link to="/register" className="text-blue-500 hover:underline">Zarejestruj się</Link>
-                </p>
-                <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                    Wejdź
+
+                <button className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 mb-4">
+                    Zarejestruj się
                 </button>
+
+                <p className="text-center text-sm">
+                    Masz już konto? <Link to="/" className="text-blue-500 hover:underline">Zaloguj się</Link>
+                </p>
             </form>
         </div>
     )

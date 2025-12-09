@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Survey, Question, Choice
 #prototyp model ankiety tu jest przerabiana na JSON
@@ -19,3 +20,16 @@ class SurveySerializer(serializers.ModelSerializer):
     class Meta:
         model = Survey
         fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active']
+
+#model użytkowników
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [ 'username','password']
+        #ukrywanie by api nigdy nie zwracało przy odczycie
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        #dzięki temu przy tworzeniu nowego użytkownika hasło jest szyfrowane
+        user = User.objects.create_user(**validated_data)
+        return user

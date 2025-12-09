@@ -2,7 +2,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Survey, Question, Choice
-from .serializers import SurveySerializer, QuestionSerializer, ChoiceSerializer
+from .serializers import SurveySerializer, QuestionSerializer, ChoiceSerializer, UserSerializer
+from django.contrib.auth.models import User
 
 
 class SurveyViewSet(viewsets.ModelViewSet):
@@ -58,3 +59,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class RegisterView(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.AllowAny] # Każdy może się zarejestrować
+    http_method_names = ['post'] # Pozwalamy tylko na POST (tworzenie)
