@@ -84,3 +84,7 @@ istnieje też dashboard: http://localhost:5173/dashboard
 
 ale najpierw trzeba się zalogować.
 
+uper user
+admin 
+h: 123
+
