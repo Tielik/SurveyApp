@@ -69,6 +69,10 @@ POST
 Oddanie głosu
 
 ❌ Nie
+POST
+/api/register
+dodanie uzytkownika z dodaniem mu jego klucza (brakuje walidacji)
+❌ Nie
 
 przykładowy link publiczny
 
@@ -79,4 +83,8 @@ http://localhost:5173/vote/7db160e5-092c-4d6a-bb8d-884e4fe069e6
 istnieje też dashboard: http://localhost:5173/dashboard
 
 ale najpierw trzeba się zalogować.
+
+uper user
+admin 
+h: 123
 
