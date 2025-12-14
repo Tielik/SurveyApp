@@ -19,6 +19,23 @@ class SurveyViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatycznie przypisujemy zalogowanego użytkownika jako właściciela
         serializer.save(owner=self.request.user)
+        # Nadpisujemy domyślną metodę usuwania
+
+    def destroy(self, request, *args, **kwargs):
+        # 1. Pobieramy ankietę, którą użytkownik chce usunąć
+        survey = self.get_object()
+        # 2. LOGIKA BIZNESOWA: Zabezpieczenie
+        # Np. Nie pozwól usunąć ankiety, która jest publicznie dostępna (is_active=True)
+        if survey.is_active:
+            return Response(
+                {"error": "Nie można usunąć aktywnej ankiety! Najpierw zmień jej status na szkic ."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        # 3. Jeśli warunki są spełnione -> Usuwamy
+        # Dzięki on_delete=models.CASCADE w models.py, to usunie też Pytania i Opcje.
+        self.perform_destroy(survey)
+        # 4. Zwracamy status 204 (No Content) - standard przy usuwaniu
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     # --- Specjalna akcja dla publicznego dostępu (Głosowanie) ---
     # Dostępna pod: /api/surveys/vote_access/?code=UUID
