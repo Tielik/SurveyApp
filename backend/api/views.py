@@ -22,9 +22,9 @@ class SurveyViewSet(viewsets.ModelViewSet):
         # Nadpisujemy domyślną metodę usuwania
 
     def destroy(self, request, *args, **kwargs):
-        # 1. Pobieramy ankietę, którą użytkownik chce usunąć
+        # Pobieramy ankietę, którą użytkownik chce usunąć
         survey = self.get_object()
-        # 2. LOGIKA BIZNESOWA: Zabezpieczenie
+        #  LOGIKA BIZNESOWA: Zabezpieczenie
         # Np. Nie pozwól usunąć ankiety, która jest publicznie dostępna (is_active=True)
         if survey.is_active:
             return Response(
