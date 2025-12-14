@@ -74,6 +74,35 @@ POST
 dodanie uzytkownika z dodaniem mu jego klucza (brakuje walidacji)
 ❌ Nie
 
+DELETE
+/api/surveys/5/ (z tokenem plus musi być ankieta wyłączona)
+usuwa ankiete pytania i odpowiedzi
+
+POST
+przykąłdowy json ankietowy:
+{
+    "title": "Wielka Ankieta Backendowa",
+    "description": "Testowanie zapisu zagnieżdżonego",
+    "is_active": true,
+    "questions": [
+        {
+            "question_text": "Jaki jest najlepszy framework?",
+            "choices": [
+                {"choice_text": "Django"},
+                {"choice_text": "Express"},
+                {"choice_text": "Spring"}
+            ]
+        },
+        {
+            "question_text": "Czy lubisz pizzę?",
+            "choices": [
+                {"choice_text": "Tak"},
+                {"choice_text": "Oczywiście, że tak"}
+            ]
+        }
+    ]
+}
+
 przykładowy link publiczny
 
 Link publiczny:/vote/7db160e5-092c-4d6a-bb8d-884e4fe069e6
