@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 interface Choice { id: number; choice_text: string; votes: number; }
 interface Question { id: number; question_text: string; choices: Choice[]; }
@@ -16,6 +16,7 @@ interface Survey {
 export default function Dashboard() {
     const [surveys, setSurveys] = useState<Survey[]>([])
     const [newTitle, setNewTitle] = useState('') // Stan dla nowej ankiety
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
 
     // Funkcja pobierająca ankiety
@@ -41,6 +42,9 @@ export default function Dashboard() {
     // Funkcja do tworzenia nowej ankiety
     const createSurvey = (e: React.FormEvent) => {
         e.preventDefault()
+        if (!newTitle.trim()) return
+
+        setLoading(true)
         const token = localStorage.getItem('token')
 
         axios.post('http://127.0.0.1:8000/api/surveys/',
@@ -50,8 +54,12 @@ export default function Dashboard() {
             .then(() => {
                 setNewTitle('') // Wyczyść pole
                 fetchSurveys() // Odśwież listę
+                setLoading(false)
             })
-            .catch(err => alert("Błąd tworzenia: " + err))
+            .catch(err => {
+                alert("Błąd tworzenia: " + err)
+                setLoading(false)
+            })
     }
 
     const handleLogout = () => {
@@ -61,116 +69,162 @@ export default function Dashboard() {
     const toggleActive = (survey: Survey) => {
         const token = localStorage.getItem('token')
 
+        // Zmieniamy lokalnie zanim przyjdzie odpowiedź z serwera
+        const updatedSurveys = surveys.map(s =>
+            s.id === survey.id ? { ...s, is_active: !s.is_active } : s
+        )
+        setSurveys(updatedSurveys)
+
         // Wysyłamy PATCH (częściowa aktualizacja), żeby zmienić tylko jedno pole
         axios.patch(`http://127.0.0.1:8000/api/surveys/${survey.id}/`,
             { is_active: !survey.is_active }, // Odwracamy wartość (jak jest true to false, jak false to true)
             { headers: { 'Authorization': `Token ${token}` } }
         )
-            .then(() => fetchSurveys()) // Odświeżamy widok
-            .catch(err => alert("Błąd aktualizacji statusu"))
+            .catch(() => {
+                alert("Błąd aktualizacji statusu")
+                fetchSurveys() // Cofnij zmiany w razie błędu
+            })
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-4xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 p-6 md:p-10 font-sans">
+            <div className="max-w-6xl mx-auto space-y-8">
 
                 {/* Nagłówek */}
-                <div className="flex justify-between items-center mb-8 bg-white p-4 rounded shadow">
-                    <h1 className="text-2xl font-bold text-gray-800">Panel Zarządzania</h1>
-                    <div className="flex gap-4 items-center">
-                        <span className="text-gray-500 text-sm">Zalogowany jako Administrator</span>
-                        <button onClick={handleLogout} className="text-red-500 font-bold hover:underline">
+                <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center border border-white/20">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">
+                            Panel Zarządzania
+                        </h1>
+                        <p className="text-gray-500 text-sm mt-1">Twórz ankiety i śledź wyniki na żywo</p>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 mt-4 md:mt-0">
+                        <button 
+                            onClick={handleLogout} 
+                            className="cursor-pointer flex items-center gap-2 text-red-500 font-bold hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                             Wyloguj
                         </button>
                     </div>
                 </div>
 
                 {/* Sekcja Tworzenia */}
-                <div className="bg-white p-6 rounded shadow mb-8">
-                    <h2 className="text-lg font-semibold mb-4">Stwórz nową ankietę</h2>
-                    <form onSubmit={createSurvey} className="flex gap-4">
-                        <input
-                            type="text"
-                            placeholder="Tytuł ankiety..."
-                            className="flex-1 border p-2 rounded"
-                            value={newTitle}
-                            onChange={e => setNewTitle(e.target.value)}
-                        />
-                        <button className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-                            Dodaj
+                <div className="bg-white p-8 rounded-2xl shadow-xl transform transition hover:scale-[1.005]">
+                    <h2 className="text-xl font-bold text-gray-700 mb-6 flex items-center gap-2">
+                        <svg className="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                        Stwórz nową ankietę
+                    </h2>
+                    <form onSubmit={createSurvey} className="flex flex-col md:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <input
+                                type="text"
+                                placeholder="Wpisz tytuł nowej ankiety..."
+                                className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-sm bg-gray-50 focus:bg-white"
+                                value={newTitle}
+                                onChange={e => setNewTitle(e.target.value)}
+                            />
+                        </div>
+                        <button 
+                            disabled={loading}
+                            className="cursor-pointer bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition-all transform active:scale-95 whitespace-nowrap"
+                        >
+                            {loading ? 'Tworzenie...' : '+ Dodaj Ankietę'}
                         </button>
                     </form>
                 </div>
 
-                {/* Lista Ankiet */}
-                <h2 className="text-xl font-bold mb-4 text-gray-700">Twoje Ankiety ({surveys.length})</h2>
-
-                <div className="space-y-6">
-                    {surveys.map(survey => (
-                        <div key={survey.id} className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition">
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 className="text-xl font-bold text-blue-600">{survey.title}</h3>
-                                    <p className="text-gray-500 text-sm">{survey.description}</p>
-                                </div>
-                                {/* PRZYCISK PUBLIKACJI */}
-                                <button
-                                    onClick={() => toggleActive(survey)}
-                                    className={`px-3 py-1 rounded text-xs font-bold uppercase tracking-wider ${survey.is_active
-                                        ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                                        }`}
-                                >
-                                    {survey.is_active ? "🟢 Aktywna" : "⚪ Szkic"}
-                                </button>
-                                <div className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
-                                    ID: {survey.id}
-                                </div>
-                            </div>
-
-                            {/* Sekcja Pytań */}
-                            <div className="bg-gray-50 p-4 rounded mb-4">
-                                <h4 className="font-semibold text-sm text-gray-500 uppercase mb-2">Pytania:</h4>
-                                {survey.questions.length === 0 ? (
-                                    <p className="text-gray-400 italic text-sm">Brak pytań. Dodaj je w panelu admina.</p>
-                                ) : (
-                                    <ul className="list-disc list-inside text-sm text-gray-700">
-                                        {survey.questions.map(q => (
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {/* PĘTLA PO ODPOWIEDZIACH */}
-                                                {q.choices.map(c => (
-                                                    <span key={c.id} className="text-sm bg-blue-100 px-3 py-1 rounded-full text-blue-800 border border-blue-200">
-                                                        {c.choice_text}
-                                                        <span className="ml-2 font-bold text-blue-900">({c.votes})</span>
-                                                    </span>
-                                                ))}
-
-                                                {/* Jeśli tablica jest pusta */}
-                                                {q.choices.length === 0 && (
-                                                    <span className="text-xs text-red-400">Brak dodanych odpowiedzi! Kliknij "+ Opcja"</span>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-
-                            {/* Sekcja Linku Publicznego */}
-                            <div className="flex items-center gap-2 bg-blue-50 p-3 rounded border border-blue-100">
-                                <span className="text-sm font-bold text-blue-800">Link publiczny:</span>
-                                <code className="text-xs bg-white px-2 py-1 rounded border">
-                                    /vote/{survey.access_code}
-                                </code>
-                            </div>
-
-                        </div>
-                    ))}
-
-                    {surveys.length === 0 && (
-                        <p className="text-center text-gray-400 mt-10">Nie masz jeszcze żadnych ankiet.</p>
-                    )}
+                {/* LISTA ANKIET (GRID) */}
+                <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-800">Twoje Ankiety</h2>
+                    <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
+                        Liczba: {surveys.length}
+                    </span>
                 </div>
 
+                {surveys.length === 0 ? (
+                    <div className="text-center py-20 bg-white/50 rounded-3xl border-2 border-dashed border-gray-300">
+                        <p className="text-gray-400 text-lg">Brak ankiet. Stwórz pierwszą powyżej!</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {surveys.map(survey => (
+                            <div key={survey.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col">
+                                
+                                {/* NAGŁÓWEK KARTY */}
+                                <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-start">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-800 mb-1">{survey.title}</h3>
+                                        <p className="text-gray-500 text-sm">{survey.description}</p>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <button
+                                            onClick={() => toggleActive(survey)}
+                                            className={`
+                                                cursor-pointer px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-colors
+                                                ${survey.is_active 
+                                                    ? "bg-green-100 text-green-700 hover:bg-green-200 border border-green-200" 
+                                                    : "bg-gray-200 text-gray-500 hover:bg-gray-300 border border-gray-300"
+                                                }
+                                            `}
+                                        >
+                                            <span className={`w-2 h-2 rounded-full ${survey.is_active ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
+                                            {survey.is_active ? "Opublikowana" : "Szkic"}
+                                        </button>
+                                        <span className="text-xs text-gray-400 font-mono">ID: {survey.id}</span>
+                                    </div>
+                                </div>
+
+                                {/* TREŚĆ KARTY */}
+                                <div className="p-6 flex-1">
+                                    <h4 className="font-semibold text-xs text-gray-400 uppercase mb-4 tracking-widest flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                                        Pytania
+                                    </h4>
+                                    
+                                    {survey.questions.length === 0 ? (
+                                        <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                            <p className="text-gray-400 italic text-sm">Brak pytań.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {survey.questions.map((q, idx) => (
+                                                <div key={q.id} className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                                                    <p className="font-semibold text-gray-800 text-sm mb-2">
+                                                        {idx + 1}. {q.question_text}
+                                                    </p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {q.choices.map(c => (
+                                                            <span key={c.id} className="text-xs font-medium bg-white px-3 py-1.5 rounded-lg text-indigo-600 border border-indigo-100 shadow-sm flex items-center gap-2">
+                                                                {c.choice_text}
+                                                                <span className="bg-indigo-100 text-indigo-800 px-1.5 rounded text-[10px] font-bold">
+                                                                    {c.votes}
+                                                                </span>
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* STOPKA KARTY - LINK */}
+                                <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2 text-gray-500 text-sm overflow-hidden">
+                                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                        <span className="truncate font-mono text-xs">/vote/{survey.access_code}</span>
+                                    </div>
+                                    
+                                    <Link to={`/vote/${survey.access_code}`} target="_blank" className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase hover:underline">
+                                        Otwórz →
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )

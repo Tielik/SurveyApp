@@ -93,7 +93,7 @@ export default function Register() {
                     <button
                         disabled={loading}
                         className={`
-                            w-full py-3 rounded-lg text-white font-bold shadow-md 
+                            cursor-pointer w-full py-3 rounded-lg text-white font-bold shadow-md 
                             transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg
                             ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700'}
                         `}
