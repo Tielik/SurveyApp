@@ -1,9 +1,13 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Survey, Question, Choice
-#prototyp model ankiety tu jest przerabiana na JSON
+from .models import Survey, Question, Choice, Profile
+from django.contrib.auth.password_validation import validate_password
+
+
+# prototyp model ankiety tu jest przerabiana na JSON
 class ChoiceSerializer(serializers.ModelSerializer):
-    id=serializers.IntegerField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Choice
         fields = ['id', 'choice_text', 'votes']
@@ -11,12 +15,13 @@ class ChoiceSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    id=serializers.IntegerField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
     choices = ChoiceSerializer(many=True, read_only=True, source='choice_set')
 
     class Meta:
         model = Question
         fields = ['id', 'question_text', 'choices']
+
 
 class SurveySerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True, source='question_set')
@@ -25,6 +30,7 @@ class SurveySerializer(serializers.ModelSerializer):
         model = Survey
         fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active']
         read_only_fields = ['access_code']
+
         def create(self, validated_data):
             #  Wyciągamy pytania z danych
             questions_data = validated_data.pop('question_set')
@@ -63,15 +69,49 @@ class SurveySerializer(serializers.ModelSerializer):
                         Choice.objects.create(question=question, **choice_data)
             return instance
 
-#model użytkowników
+
+# model użytkowników
 class UserSerializer(serializers.ModelSerializer):
+    # Dodajemy pola z profilu
+    avatar = serializers.ImageField(source='profile.avatar', required=False, allow_null=True)
+    background_image = serializers.ImageField(source='profile.background_image', required=False, allow_null=True)
+
     class Meta:
         model = User
-        fields = [ 'username','password']
-        #ukrywanie by api nigdy nie zwracało przy odczycie
+        fields = ['username', 'password', 'avatar', 'background_image']
+        # ukrywanie by api nigdy nie zwracało przy odczycie
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        #dzięki temu przy tworzeniu nowego użytkownika hasło jest szyfrowane
+        # dzięki temu przy tworzeniu nowego użytkownika hasło jest szyfrowane
         user = User.objects.create_user(**validated_data)
         return user
+
+    def update(self, instance, validated_data):
+        # Obsługa pól profilu (avatar/background)
+        profile_data = validated_data.pop('profile', {})
+        profile = instance.profile
+
+        # Aktualizacja User (np. username)
+        instance.username = validated_data.get('username', instance.username)
+        instance.save()
+
+        # Aktualizacja Profile
+        if 'avatar' in profile_data:
+            profile.avatar = profile_data['avatar']
+        if 'background_image' in profile_data:
+            profile.background_image = profile_data['background_image']
+        profile.save()
+
+        return instance
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, validators=[validate_password])
+    confirm_password = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Hasła nie są identyczne."})
+        return attrs

@@ -117,3 +117,15 @@ uper user
 admin 
 h: 123
 
+## 👤 Zarządzanie Profilem i Kontem
+
+> Wszystkie endpointy wymagają nagłówka autoryzacji:  
+> `Authorization: Token <twój_token>`
+
+| Metoda | Endpoint                          | Opis                                              | Wymaga logowania | Parametry (Body) |
+|------:|-----------------------------------|---------------------------------------------------|:----------------:|------------------|
+| GET   | `/api/profile/me/`                | Pobranie danych profilu (username, zdjęcia)       | ✅ Tak           | — |
+| PATCH | `/api/profile/me/`                | Aktualizacja profilu                              | ✅ Tak           | `form-data`:<br>• `avatar` (file)<br>• `background_image` (file)<br>• `username` (text) |
+| PATCH | `/api/profile/me/`                | Usunięcie awatara lub zdjęcia tła                 | ✅ Tak           | `JSON`:<br>`{"avatar": null}`<br>lub<br>`{"background_image": null}` |
+| POST  | `/api/profile/change-password/`   | Bezpieczna zmiana hasła                           | ✅ Tak           | `JSON`:<br>`{"old_password": "...", "new_password": "..."}` |
+| DELETE| `/api/profile/me/`                | Usunięcie konta i wszystkich ankiet (CASCADE)     | ✅ Tak           | — |
