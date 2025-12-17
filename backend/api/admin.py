@@ -1,6 +1,7 @@
 from django.contrib import admin
-from . models import Survey, Question, Choice
+from . models import Survey, Question, Choice, Profile
 # Register your models here.
 admin.site.register(Survey)
 admin.site.register(Question)
 admin.site.register(Choice)
+admin.site.register(Profile)

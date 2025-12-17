@@ -2,7 +2,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Survey, Question, Choice
-from .serializers import SurveySerializer, QuestionSerializer, ChoiceSerializer, UserSerializer
+from .serializers import SurveySerializer, QuestionSerializer, ChoiceSerializer, UserSerializer, \
+    ChangePasswordSerializer
 from django.contrib.auth.models import User
 
 
@@ -77,8 +78,63 @@ class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
 class RegisterView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny] # Każdy może się zarejestrować
-    http_method_names = ['post'] # Pozwalamy tylko na POST (tworzenie)
+    permission_classes = [permissions.AllowAny]  # Każdy może się zarejestrować
+    http_method_names = ['post']  # Pozwalamy tylko na POST (tworzenie)
+
+
+class ProfileViewSet(viewsets.GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+
+    # GET /api/profile/me/
+    @action(detail=False, methods=['get', 'put', 'patch'])
+    def me(self, request):
+        user = request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data)
+
+        # PUT/PATCH - edycja danych (username, avatar, background)
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    @me.mapping.delete
+    def delete_my_account(self, request):
+        # Proste usunięcie - CASCADE w modelu zajmie się resztą
+        request.user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PasswordViewSet(viewsets.GenericViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    # Tworzymy akcję "change_password" dostępną pod /api/password/change_password/
+    @action(detail=False, methods=['post'])
+    def change_password(self, request):
+        user = request.user
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            # Sprawdzenie starego hasła
+            if not user.check_password(serializer.validated_data.get("old_password")):
+                return Response(
+                    {"old_password": ["Błędne aktualne hasło."]},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # set_password zajmuje się haszowaniem nowego hasła
+            user.set_password(serializer.validated_data.get("new_password"))
+            user.save()
+            return Response(
+                {"detail": "Hasło zostało pomyślnie zmienione."},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
