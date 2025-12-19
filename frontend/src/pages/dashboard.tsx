@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 
 interface Choice { id: number; choice_text: string; votes: number; }
 interface Question { id: number; question_text: string; choices: Choice[]; }
@@ -17,7 +18,7 @@ export default function Dashboard() {
     const [surveys, setSurveys] = useState<Survey[]>([])
     const navigate = useNavigate()
 
-    const fetchSurveys = () => {
+    const fetchSurveys = useCallback(() => {
         const token = localStorage.getItem('token')
         if (!token) {
             navigate('/')
@@ -29,11 +30,11 @@ export default function Dashboard() {
         })
             .then(response => setSurveys(response.data))
             .catch(error => console.error(error))
-    }
+    }, [navigate])
 
     useEffect(() => {
         fetchSurveys()
-    }, [navigate])
+    }, [fetchSurveys])
 
     const handleLogout = () => {
         localStorage.removeItem('token')
@@ -52,8 +53,11 @@ export default function Dashboard() {
             { is_active: !survey.is_active },
             { headers: { 'Authorization': `Token ${token}` } }
         )
+            .then(() => {
+                toast.success(!survey.is_active ? "Ankieta opublikowana" : "Ankieta przeniesiona do szkiców")
+            })
             .catch(() => {
-                alert("Błąd aktualizacji statusu")
+                toast.error("Błąd aktualizacji statusu")
                 fetchSurveys()
             })
     }
