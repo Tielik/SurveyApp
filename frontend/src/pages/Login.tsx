@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { AuthCard } from "@/components/auth/auth-card"
 import { AuthLayout } from "@/components/auth/auth-layout"
 import { CredentialsForm } from "@/components/auth/credentials-form"
+import { routes } from "@/routes"
 import { authService } from "@/services/auth-service"
 import type { Credentials } from "@/types/auth"
 
@@ -18,7 +19,7 @@ export default function Login() {
       setError(null)
       const token = await authService.login(values)
       localStorage.setItem("token", token)
-      navigate("/dashboard")
+      navigate(routes.dashboard)
     } catch (err) {
       console.error("Login failed", err)
       setError("Błędny login lub hasło. Spróbuj ponownie.")
@@ -32,7 +33,7 @@ export default function Login() {
       <AuthCard
         title="Witaj ponownie"
         description="Zaloguj się, aby zarządzać ankietami."
-        actionHref="/register"
+        actionHref={routes.register}
         actionLabel="Nie masz konta? Zarejestruj się"
         actionIcon="register"
       >

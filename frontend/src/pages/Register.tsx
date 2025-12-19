@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { AuthCard } from "@/components/auth/auth-card"
 import { AuthLayout } from "@/components/auth/auth-layout"
 import { CredentialsForm } from "@/components/auth/credentials-form"
+import { routes } from "@/routes"
 import { authService } from "@/services/auth-service"
 import type { Credentials } from "@/types/auth"
 
@@ -17,7 +18,7 @@ export default function Register() {
       setLoading(true)
       setError(null)
       await authService.register(values)
-      navigate("/")
+      navigate(routes.login)
     } catch (err) {
       console.error("Registration failed", err)
       setError("Nie udało się utworzyć konta. Upewnij się, że login jest unikalny.")
@@ -31,7 +32,7 @@ export default function Register() {
       <AuthCard
         title="Dołącz do nas"
         description="Załóż konto i zacznij zbierać odpowiedzi."
-        actionHref="/"
+        actionHref={routes.login}
         actionLabel="Masz już konto? Zaloguj się"
         actionIcon="login"
       >

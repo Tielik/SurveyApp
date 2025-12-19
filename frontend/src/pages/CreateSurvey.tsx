@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { routes } from "@/routes"
 import { surveyService } from "@/services/survey-service"
 import type { CreateChoicePayload } from "@/types/survey"
 
@@ -38,7 +39,7 @@ export default function CreateSurvey() {
 
   useEffect(() => {
     if (!hasToken) {
-      navigate("/")
+      navigate(routes.login)
     }
   }, [hasToken, navigate])
 
@@ -125,7 +126,7 @@ export default function CreateSurvey() {
       toast.success("Ankieta utworzona", {
         description: `Kod dostępu: ${survey.access_code}`,
       })
-      navigate("/dashboard")
+      navigate(routes.dashboard)
     } catch (err) {
       console.error("Failed to create survey", err)
       setError("Nie udało się utworzyć ankiety. Spróbuj ponownie.")
@@ -140,13 +141,13 @@ export default function CreateSurvey() {
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
-            <Link to="/dashboard">
+            <Link to={routes.dashboard}>
               <ArrowLeft className="h-4 w-4" />
               Wróć do panelu
             </Link>
           </Button>
           <Button asChild variant="link">
-            <Link to="/dashboard">Podgląd ankiet</Link>
+            <Link to={routes.dashboard}>Podgląd ankiet</Link>
           </Button>
         </div>
 
