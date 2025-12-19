@@ -14,14 +14,15 @@ survey-platform/
    core/               # Ustawienia główne (settings.py)  
   manage.py           # zarządzanie Django  
   
-frontend/               # Klient (React)  
+frontend/               # Klient (React + Vite + shadcn/ui)  
 src/  
- pages/          # Ekrany aplikacji  
-  Login.tsx     # Logowanie  
-  Dashboard.tsx # Panel zarządzania (dla twórcy)  
-  Vote.tsx      # Ekran głosowania (dla publiczności)  
-  App.tsx         # Główna mapa routingu  
-  main.tsx        # Punkt wejścia  
+ routes.ts            # Centralny słownik ścieżek  
+ App.tsx              # Główna mapa routingu (korzysta z routes.ts)  
+ main.tsx             # Punkt wejścia + Toaster (sonner)  
+ pages/               # Ekrany aplikacji
+ services/            # Logika
+ components/ui/       # Komponenty shadcn  
+ components/auth/     # Wspólne bloki auth
 
 
  API Endpoints (Jak to działa?)

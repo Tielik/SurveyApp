@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { routes } from '@/routes'
 
 interface Choice { id: number; choice_text: string; votes: number; }
@@ -53,8 +54,11 @@ export default function Dashboard() {
             { is_active: !survey.is_active },
             { headers: { 'Authorization': `Token ${token}` } }
         )
+            .then(() => {
+                toast.success(!survey.is_active ? "Ankieta opublikowana" : "Ankieta przeniesiona do szkiców")
+            })
             .catch(() => {
-                alert("Błąd aktualizacji statusu")
+                toast.error("Błąd aktualizacji statusu")
                 fetchSurveys()
             })
     }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { useParams } from "react-router-dom"
+import { toast } from "sonner"
 
 type Choice = { id: number; choice_text: string; votes: number }
 type Question = { id: number; question_text: string; choices: Choice[] }
@@ -22,6 +23,7 @@ export default function Vote() {
       .catch(() => {
         setError("Nie znaleziono ankiety lub jest nieaktywna.")
         setLoading(false)
+        toast.error("Nie znaleziono ankiety lub jest nieaktywna.")
       })
   }, [code])
 
@@ -29,7 +31,7 @@ export default function Vote() {
     axios
       .post(`http://127.0.0.1:8000/api/choices/${choiceId}/vote/`)
       .then(() => {
-        alert("Dziękujemy za głos!")
+        toast.success("Dziękujemy za głos!")
         if (!survey) return
 
         const updatedQuestions = survey.questions.map((question) => {
@@ -41,7 +43,7 @@ export default function Vote() {
         })
         setSurvey({ ...survey, questions: updatedQuestions })
       })
-      .catch(() => alert("Błąd głosowania."))
+      .catch(() => toast.error("Błąd głosowania."))
   }
 
   if (loading) return <div className="p-10 text-center">Ładowanie ankiety...</div>
