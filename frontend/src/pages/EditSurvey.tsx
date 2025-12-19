@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { routes } from "@/routes"
 import { surveyService } from "@/services/survey-service"
 import type { SurveyDetail } from "@/types/survey"
 
@@ -47,7 +48,7 @@ export default function EditSurvey() {
 
   useEffect(() => {
     if (!hasToken) {
-      navigate("/")
+      navigate(routes.login)
       return
     }
     if (!id) return
@@ -64,7 +65,7 @@ export default function EditSurvey() {
       })
       .catch(() => {
         toast.error("Nie udało się pobrać ankiety.")
-        navigate("/dashboard")
+        navigate(routes.dashboard)
       })
       .finally(() => setLoading(false))
   }, [hasToken, id, navigate])
@@ -190,7 +191,7 @@ export default function EditSurvey() {
       ])
 
       toast.success("Ankieta zapisana")
-      navigate("/dashboard")
+      navigate(routes.dashboard)
     } catch (err) {
       console.error("Failed to update survey", err)
       setError("Nie udało się zapisać ankiety. Spróbuj ponownie.")
@@ -213,7 +214,7 @@ export default function EditSurvey() {
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
-            <Link to="/dashboard">
+            <Link to={routes.dashboard}>
               <ArrowLeft className="h-4 w-4" />
               Wróć do panelu
             </Link>
