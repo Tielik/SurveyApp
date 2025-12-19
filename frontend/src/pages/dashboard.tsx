@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
 
@@ -15,11 +15,8 @@ interface Survey {
 
 export default function Dashboard() {
     const [surveys, setSurveys] = useState<Survey[]>([])
-    const [newTitle, setNewTitle] = useState('') // Stan dla nowej ankiety
-    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
 
-    // Funkcja pobierająca ankiety
     const fetchSurveys = () => {
         const token = localStorage.getItem('token')
         if (!token) {
@@ -34,55 +31,30 @@ export default function Dashboard() {
             .catch(error => console.error(error))
     }
 
-    // Pobierz dane przy wejściu na stronę
     useEffect(() => {
         fetchSurveys()
     }, [navigate])
-
-    // Funkcja do tworzenia nowej ankiety
-    const createSurvey = (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!newTitle.trim()) return
-
-        setLoading(true)
-        const token = localStorage.getItem('token')
-
-        axios.post('http://127.0.0.1:8000/api/surveys/',
-            { title: newTitle, description: "Opis domyślny" },
-            { headers: { 'Authorization': `Token ${token}` } }
-        )
-            .then(() => {
-                setNewTitle('') // Wyczyść pole
-                fetchSurveys() // Odśwież listę
-                setLoading(false)
-            })
-            .catch(err => {
-                alert("Błąd tworzenia: " + err)
-                setLoading(false)
-            })
-    }
 
     const handleLogout = () => {
         localStorage.removeItem('token')
         navigate('/')
     }
+
     const toggleActive = (survey: Survey) => {
         const token = localStorage.getItem('token')
 
-        // Zmieniamy lokalnie zanim przyjdzie odpowiedź z serwera
         const updatedSurveys = surveys.map(s =>
             s.id === survey.id ? { ...s, is_active: !s.is_active } : s
         )
         setSurveys(updatedSurveys)
 
-        // Wysyłamy PATCH (częściowa aktualizacja), żeby zmienić tylko jedno pole
         axios.patch(`http://127.0.0.1:8000/api/surveys/${survey.id}/`,
-            { is_active: !survey.is_active }, // Odwracamy wartość (jak jest true to false, jak false to true)
+            { is_active: !survey.is_active },
             { headers: { 'Authorization': `Token ${token}` } }
         )
             .catch(() => {
                 alert("Błąd aktualizacji statusu")
-                fetchSurveys() // Cofnij zmiany w razie błędu
+                fetchSurveys()
             })
     }
 
@@ -90,7 +62,6 @@ export default function Dashboard() {
         <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 p-6 md:p-10 font-sans">
             <div className="max-w-6xl mx-auto space-y-8">
 
-                {/* Nagłówek */}
                 <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center border border-white/20">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">
@@ -100,6 +71,12 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="flex items-center gap-4 mt-4 md:mt-0">
+                        <Link 
+                            to="/surveys/create" 
+                            className="cursor-pointer bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all"
+                        >
+                            Utwórz ankietę
+                        </Link>
                         <button 
                             onClick={handleLogout} 
                             className="cursor-pointer flex items-center gap-2 text-red-500 font-bold hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
@@ -110,32 +87,6 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Sekcja Tworzenia */}
-                <div className="bg-white p-8 rounded-2xl shadow-xl transform transition hover:scale-[1.005]">
-                    <h2 className="text-xl font-bold text-gray-700 mb-6 flex items-center gap-2">
-                        <svg className="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                        Stwórz nową ankietę
-                    </h2>
-                    <form onSubmit={createSurvey} className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <input
-                                type="text"
-                                placeholder="Wpisz tytuł nowej ankiety..."
-                                className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition shadow-sm bg-gray-50 focus:bg-white"
-                                value={newTitle}
-                                onChange={e => setNewTitle(e.target.value)}
-                            />
-                        </div>
-                        <button 
-                            disabled={loading}
-                            className="cursor-pointer bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition-all transform active:scale-95 whitespace-nowrap"
-                        >
-                            {loading ? 'Tworzenie...' : '+ Dodaj Ankietę'}
-                        </button>
-                    </form>
-                </div>
-
-                {/* LISTA ANKIET (GRID) */}
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-gray-800">Twoje Ankiety</h2>
                     <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
@@ -145,14 +96,16 @@ export default function Dashboard() {
 
                 {surveys.length === 0 ? (
                     <div className="text-center py-20 bg-white/50 rounded-3xl border-2 border-dashed border-gray-300">
-                        <p className="text-gray-400 text-lg">Brak ankiet. Stwórz pierwszą powyżej!</p>
+                        <p className="text-gray-400 text-lg">Brak ankiet. Utwórz pierwszą w kreatorze.</p>
+                        <Link to="/surveys/create" className="mt-4 inline-flex px-6 py-3 rounded-lg bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700">
+                            Otwórz kreator
+                        </Link>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {surveys.map(survey => (
                             <div key={survey.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col">
                                 
-                                {/* NAGŁÓWEK KARTY */}
                                 <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-start">
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-800 mb-1">{survey.title}</h3>
@@ -176,7 +129,6 @@ export default function Dashboard() {
                                     </div>
                                 </div>
 
-                                {/* TREŚĆ KARTY */}
                                 <div className="p-6 flex-1">
                                     <h4 className="font-semibold text-xs text-gray-400 uppercase mb-4 tracking-widest flex items-center gap-2">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
@@ -210,7 +162,6 @@ export default function Dashboard() {
                                     )}
                                 </div>
 
-                                {/* STOPKA KARTY - LINK */}
                                 <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-2 text-gray-500 text-sm overflow-hidden">
                                         <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
@@ -218,7 +169,7 @@ export default function Dashboard() {
                                     </div>
                                     
                                     <Link to={`/vote/${survey.access_code}`} target="_blank" className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase hover:underline">
-                                        Otwórz →
+                                        Otwórz głosowanie
                                     </Link>
                                 </div>
                             </div>
