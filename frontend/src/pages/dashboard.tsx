@@ -71,8 +71,8 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="flex items-center gap-4 mt-4 md:mt-0">
-                        <Link 
-                            to="/surveys/create" 
+                        <Link
+                            to="/surveys/create"
                             className="cursor-pointer bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all"
                         >
                             Utwórz ankietę
@@ -168,9 +168,14 @@ export default function Dashboard() {
                                         <span className="truncate font-mono text-xs">/vote/{survey.access_code}</span>
                                     </div>
                                     
-                                    <Link to={`/vote/${survey.access_code}`} target="_blank" className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase hover:underline">
-                                        Otwórz głosowanie
-                                    </Link>
+                                    <div className="flex items-center gap-3">
+                                        <Link to={`/surveys/${survey.id}/edit`} className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase hover:underline">
+                                            Edytuj
+                                        </Link>
+                                        <Link to={`/vote/${survey.access_code}`} target="_blank" className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase hover:underline">
+                                            Otwórz głosowanie
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         ))}

@@ -4,6 +4,7 @@ import Dashboard from './pages/dashboard'
 import Vote from './pages/Vote'
 import Register from './pages/Register'
 import CreateSurvey from './pages/CreateSurvey'
+import EditSurvey from './pages/EditSurvey'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/surveys/create" element={<CreateSurvey />} />
+        <Route path="/surveys/:id/edit" element={<EditSurvey />} />
 
         {/* :code oznacza zmienną (to co wpiszemy w URL trafi do zmiennej code) */}
         <Route path="/vote/:code" element={<Vote />} />
