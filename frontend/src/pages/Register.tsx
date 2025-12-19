@@ -32,7 +32,6 @@ export default function Register() {
       <AuthCard
         title="Dołącz do nas"
         description="Załóż konto i zacznij zbierać odpowiedzi."
-        actionHref="/"
         actionHref={routes.login}
         actionLabel="Masz już konto? Zaloguj się"
         actionIcon="login"

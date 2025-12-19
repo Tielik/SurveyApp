@@ -33,7 +33,6 @@ export default function Login() {
       <AuthCard
         title="Witaj ponownie"
         description="Zaloguj się, aby zarządzać ankietami."
-        actionHref="/register"
         actionHref={routes.register}
         actionLabel="Nie masz konta? Zarejestruj się"
         actionIcon="register"
