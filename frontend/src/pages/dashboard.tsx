@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
 
@@ -17,7 +17,7 @@ export default function Dashboard() {
     const [surveys, setSurveys] = useState<Survey[]>([])
     const navigate = useNavigate()
 
-    const fetchSurveys = () => {
+    const fetchSurveys = useCallback(() => {
         const token = localStorage.getItem('token')
         if (!token) {
             navigate('/')
@@ -29,11 +29,11 @@ export default function Dashboard() {
         })
             .then(response => setSurveys(response.data))
             .catch(error => console.error(error))
-    }
+    }, [navigate])
 
     useEffect(() => {
         fetchSurveys()
-    }, [navigate])
+    }, [fetchSurveys])
 
     const handleLogout = () => {
         localStorage.removeItem('token')
