@@ -7,20 +7,22 @@ from django.contrib.auth.password_validation import validate_password
 # prototyp model ankiety tu jest przerabiana na JSON
 class ChoiceSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all(), write_only=True)
 
     class Meta:
         model = Choice
-        fields = ['id', 'choice_text', 'votes']
+        fields = ['id', 'choice_text', 'votes', 'question']
         read_only_fields = ['votes']
 
 
 class QuestionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     choices = ChoiceSerializer(many=True, read_only=True, source='choice_set')
+    survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all(), write_only=True)
 
     class Meta:
         model = Question
-        fields = ['id', 'question_text', 'choices']
+        fields = ['id', 'question_text', 'choices', 'survey']
 
 
 class SurveySerializer(serializers.ModelSerializer):
