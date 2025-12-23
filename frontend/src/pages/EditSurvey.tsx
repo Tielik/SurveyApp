@@ -269,7 +269,7 @@ export default function EditSurvey() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Pytania</h3>
-                  <Button type="button" variant="secondary" size="sm" onClick={addQuestion}>
+                  <Button type="button" variant="outline" size="sm" onClick={addQuestion}>
                     <Plus className="mr-2 h-4 w-4" />
                     Dodaj pytanie
                   </Button>

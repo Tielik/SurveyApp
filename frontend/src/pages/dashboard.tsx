@@ -168,8 +168,15 @@ export default function Dashboard() {
 
                                 <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-2 text-gray-500 text-sm overflow-hidden">
-                                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                                        <span className="truncate font-mono text-xs">/vote/{survey.access_code}</span>
+                                        <button type="button" className=" hover:bg-indigo-600 rounded-full hover:text-white px-2 py-1 transition-colors"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(`/vote/${survey.access_code}`)
+                                                .then(() => toast.success("Link skopiowany!"))
+                                                .catch(() => toast.error("Błąd kopiowania"));
+                                            }}>
+                                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                        </button>
+                                        <span className="break-all font-mono text-xs">/vote/{survey.access_code}</span>
                                     </div>
                                     
                                     <div className="flex items-center gap-3">
