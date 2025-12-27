@@ -6,7 +6,7 @@ import type { Credentials } from "@/types/auth"
 type Props = {
   error: string | null
   loading: boolean
-  onSubmit: (values: Credentials) => void
+  onSubmit: (values: Credentials) => Promise<void>
 }
 
 export default function LoginView({ error, loading, onSubmit }: Props) {
