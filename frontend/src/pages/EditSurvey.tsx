@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { surveyService } from "@/services/survey-service"
 import type { SurveyDetail } from "@/types/survey"
+import type { SurveyIdParams } from "@/types/router"
 
 type ChoiceDraft = { id: string; text: string; originalId?: number }
 type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[]; originalId?: number }
@@ -31,7 +32,7 @@ const mapSurveyToDraft = (survey: SurveyDetail): QuestionDraft[] =>
   }))
 
 export default function EditSurvey() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = useParams<SurveyIdParams>()
   const navigate = useNavigate()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
