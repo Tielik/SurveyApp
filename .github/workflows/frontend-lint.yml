@@ -1,10 +1,9 @@
 name: Frontend Lint
 
 on:
-  push:
-    branches: [main, "**/front/**", feat/**]
   pull_request:
-    branches: [main]
+    paths:
+      - "frontend/**"
 
 jobs:
   lint:
