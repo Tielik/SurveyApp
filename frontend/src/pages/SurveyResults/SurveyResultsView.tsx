@@ -1,55 +1,29 @@
-import { useEffect, useMemo, useState } from "react"
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
-import { toast } from "sonner"
+import { Link } from "react-router-dom"
 
 import QuestionResultsChart from "@/components/QuestionResultsChart"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { surveyService } from "@/services/survey-service"
 import type { SurveyDetail } from "@/types/survey"
-import type { SurveyIdParams } from "@/types/router"
 
-type LocationState = { survey?: SurveyDetail }
+type QuestionTotal = { id: number; label: string; total: number }
 
-export default function SurveyResults() {
-  const { id } = useParams<SurveyIdParams>()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const stateSurvey = (location.state as LocationState | null)?.survey
+type Props = {
+  survey: SurveyDetail | null
+  loading: boolean
+  error: string
+  questionTotals: QuestionTotal[]
+  maxTotal: number
+  totalVotesAll: number
+}
 
-  const [survey, setSurvey] = useState<SurveyDetail | null>(stateSurvey ?? null)
-  const [loading, setLoading] = useState(!stateSurvey)
-  const [error, setError] = useState("")
-  const hasToken = useMemo(() => Boolean(localStorage.getItem("token")), [])
-
-  useEffect(() => {
-    if (!hasToken) {
-      navigate("/")
-      return
-    }
-    if (stateSurvey) return
-    surveyService
-      .getSurvey(Number(id))
-      .then(setSurvey)
-      .catch(() => {
-        setError("Nie znaleziono ankiety albo brak uprawnien.")
-        toast.error("Nie znaleziono ankiety albo brak uprawnien.")
-      })
-      .finally(() => setLoading(false))
-  }, [hasToken, id, navigate, stateSurvey])
-
-  const questionTotals = useMemo(() => {
-    if (!survey) return []
-    return survey.questions.map((q) => ({
-      id: q.id,
-      label: q.question_text,
-      total: q.choices.reduce((acc, c) => acc + c.votes, 0),
-    }))
-  }, [survey])
-
-  const maxTotal = questionTotals.reduce((max, q) => Math.max(max, q.total), 1)
-  const totalVotesAll = questionTotals.reduce((acc, q) => acc + q.total, 0)
-
+export default function SurveyResultsView({
+  survey,
+  loading,
+  error,
+  questionTotals,
+  maxTotal,
+  totalVotesAll,
+}: Props) {
   if (loading) {
     return <div className="p-10 text-center text-gray-600">Ladowanie wynikow...</div>
   }
@@ -142,7 +116,9 @@ export default function SurveyResults() {
                 </li>
                 <li className="flex items-center justify-between">
                   <span>Link do glosowania</span>
-                  <span className="font-mono text-xs text-indigo-600 break-all">/vote/{survey.access_code}</span>
+                  <span className="font-mono text-xs text-indigo-600 break-all">
+                    /vote/{survey.access_code}
+                  </span>
                 </li>
               </ul>
             </CardContent>
