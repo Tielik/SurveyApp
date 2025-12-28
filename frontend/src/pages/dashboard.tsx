@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+﻿import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
+import { BarChart3, ExternalLink, Pencil } from 'lucide-react'
 
 interface Choice { id: number; choice_text: string; votes: number; }
 interface Question { id: number; question_text: string; choices: Choice[]; }
@@ -166,33 +167,60 @@ export default function Dashboard() {
                                     )}
                                 </div>
 
-                                <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
+                                                                <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-2 text-gray-500 text-sm overflow-hidden">
-                                        <button type="button" className=" hover:bg-indigo-600 rounded-full hover:text-white px-2 py-1 transition-colors"
+                                        <button
+                                            type="button"
+                                            className="hover:bg-indigo-600 rounded-full hover:text-white px-2 py-1 transition-colors"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(`/vote/${survey.access_code}`)
-                                                .then(() => toast.success("Link skopiowany!"))
-                                                .catch(() => toast.error("Błąd kopiowania"));
-                                            }}>
+                                                    .then(() => toast.success("Link skopiowany!"))
+                                                    .catch(() => toast.error("Blad kopiowania"));
+                                            }}
+                                            title="Kopiuj link do glosowania"
+                                        >
                                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                                         </button>
                                         <span className="break-all font-mono text-xs">/vote/{survey.access_code}</span>
                                     </div>
                                     
                                     <div className="flex items-center gap-3">
-                                        <Link to={`/surveys/${survey.id}/edit`} className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase hover:underline">
-                                            Edytuj
+                                        <Link
+                                            to={`/surveys/${survey.id}/results`}
+                                            state={{ survey }}
+                                            className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
+                                            title="Zobacz wyniki ankiety"
+                                        >
+                                            <BarChart3 className="h-4 w-4" />
+                                            <span className="sr-only">Wyniki</span>
                                         </Link>
-                                        <Link to={`/vote/${survey.access_code}`} target="_blank" className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase hover:underline">
-                                            Otwórz głosowanie
+                                        <Link
+                                            to={`/surveys/${survey.id}/edit`}
+                                            className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
+                                            title="Edytuj ankiete"
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                            <span className="sr-only">Edytuj</span>
+                                        </Link>
+                                        <Link
+                                            to={`/vote/${survey.access_code}`}
+                                            target="_blank"
+                                            className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
+                                            title="Otworz glosowanie"
+                                        >
+                                            <ExternalLink className="h-4 w-4" />
+                                            <span className="sr-only">Otworz glosowanie</span>
                                         </Link>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                )}
+                        )}
             </div>
         </div>
     )
 }
+
+
+
