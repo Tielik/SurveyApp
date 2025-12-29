@@ -49,13 +49,17 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     background_image = models.ImageField(upload_to='backgrounds/', null=True, blank=True)
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token = models.UUIDField(default=uuid.uuid4, unique=True)
+
+
 
     def __str__(self):
         # Sprawdzamy, czy pliki istnieją, aby uniknąć błędów, jeśli pola są puste
         avatar_path = self.avatar.url if self.avatar else "Brak awatara"
         bg_path = self.background_image.url if self.background_image else "Brak tła"
 
-        return f"Profil: {self.user.username} | Avatar: {avatar_path} | BG: {bg_path}"
+        return f"Profil: {self.user.username} | Email verified: {self.is_email_verified} | Avatar: {avatar_path} | BG: {bg_path}"
 
 
 @receiver(post_save, sender=User)
@@ -67,3 +71,38 @@ def manage_user_profile(sender, instance, created, **kwargs):
         # Gdy User jest aktualizowany, zapisujemy też zmiany w profilu
         if hasattr(instance, 'profile'):
             instance.profile.save()
+
+
+class Rating(models.Model):
+    question = models.OneToOneField(
+        Question,
+        on_delete=models.CASCADE,
+        related_name="rating"
+    )
+
+    rate_1 = models.PositiveIntegerField(default=0)
+    rate_2 = models.PositiveIntegerField(default=0)
+    rate_3 = models.PositiveIntegerField(default=0)
+    rate_4 = models.PositiveIntegerField(default=0)
+    rate_5 = models.PositiveIntegerField(default=0)
+
+    def add_vote(self, value: int):
+        if value == 1:
+            self.rate_1 += 1
+        elif value == 2:
+            self.rate_2 += 1
+        elif value == 3:
+            self.rate_3 += 1
+        elif value == 4:
+            self.rate_4 += 1
+        elif value == 5:
+            self.rate_5 += 1
+        else:
+            raise ValueError("Rating must be between 1 and 5")
+
+        self.save()
+
+@receiver(post_save, sender=Question)
+def create_rating(sender, instance, created, **kwargs):
+    if created:
+        Rating.objects.create(question=instance)
