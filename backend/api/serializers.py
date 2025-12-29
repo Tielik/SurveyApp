@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import Survey, Question, Choice, Profile
 from django.contrib.auth.password_validation import validate_password
+from .models import Rating
 
 
 # prototyp model ankiety tu jest przerabiana na JSON
@@ -14,15 +15,23 @@ class ChoiceSerializer(serializers.ModelSerializer):
         fields = ['id', 'choice_text', 'votes', 'question']
         read_only_fields = ['votes']
 
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['rate_1', 'rate_2', 'rate_3', 'rate_4', 'rate_5']
+
+
 
 class QuestionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     choices = ChoiceSerializer(many=True, read_only=True, source='choice_set')
     survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all(), write_only=True)
+    rating = RatingSerializer(read_only=True)
+    
 
     class Meta:
         model = Question
-        fields = ['id', 'question_text', 'choices', 'survey']
+        fields = ['id', 'question_text', 'choices', 'survey', 'rating']
 
 
 class SurveySerializer(serializers.ModelSerializer):
@@ -117,3 +126,9 @@ class ChangePasswordSerializer(serializers.Serializer):
         if attrs['new_password'] != attrs['confirm_password']:
             raise serializers.ValidationError({"confirm_password": "Hasła nie są identyczne."})
         return attrs
+    
+
+class RatingVoteSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+
