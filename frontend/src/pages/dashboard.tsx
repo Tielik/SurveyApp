@@ -64,9 +64,8 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 p-6 md:p-10 font-sans">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
             <div className="max-w-6xl mx-auto space-y-8">
-
                 <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center border border-white/20">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">
@@ -171,7 +170,7 @@ export default function Dashboard() {
                                     <div className="flex items-center gap-2 text-gray-500 text-sm overflow-hidden">
                                         <button
                                             type="button"
-                                            className="hover:bg-indigo-600 rounded-full hover:text-white px-2 py-1 transition-colors"
+                                            className="hover:bg-indigo-600 rounded-full hover:text-white p-2 transition-colors"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(`/vote/${survey.access_code}`)
                                                     .then(() => toast.success("Link skopiowany!"))
@@ -188,7 +187,7 @@ export default function Dashboard() {
                                         <Link
                                             to={`/surveys/${survey.id}/results`}
                                             state={{ survey }}
-                                            className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
+                                            className="hover:bg-indigo-600 rounded-full hover:text-white p-2 transition-colors"
                                             title="Zobacz wyniki ankiety"
                                         >
                                             <BarChart3 className="h-4 w-4" />
@@ -196,7 +195,7 @@ export default function Dashboard() {
                                         </Link>
                                         <Link
                                             to={`/surveys/${survey.id}/edit`}
-                                            className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
+                                            className="hover:bg-indigo-600 rounded-full hover:text-white p-2 transition-colors"
                                             title="Edytuj ankiete"
                                         >
                                             <Pencil className="h-4 w-4" />
@@ -205,7 +204,7 @@ export default function Dashboard() {
                                         <Link
                                             to={`/vote/${survey.access_code}`}
                                             target="_blank"
-                                            className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
+                                            className="hover:bg-indigo-600 rounded-full hover:text-white p-2 transition-colors"
                                             title="Otworz glosowanie"
                                         >
                                             <ExternalLink className="h-4 w-4" />

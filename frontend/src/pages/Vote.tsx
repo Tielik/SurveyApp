@@ -51,9 +51,10 @@ export default function Vote() {
   if (!survey) return null
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4 font-sans">
-      <div className="mx-auto max-w-2xl overflow-hidden rounded-xl bg-white shadow-lg">
-        <div className="bg-blue-600 p-8 text-center text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
+      <div className="mx-auto flex max-w-2xl flex-col">
+        <div className="bg-white/80 backdrop-blur-md my-6 overflow-hidden shadow-lg flex-col md:flex-row justify-between items-center border border-white/20 rounded-xl">
+        <div className="bg-blue-600 p-8 text-center text-white ">
           <h1 className="mb-2 text-3xl font-bold">{survey.title}</h1>
           <p className="opacity-90">{survey.description}</p>
         </div>
@@ -85,6 +86,7 @@ export default function Vote() {
 
         <div className="bg-gray-50 p-4 text-center text-xs text-gray-400">
           Powered by SurveyPlatform
+        </div>
         </div>
       </div>
     </div>

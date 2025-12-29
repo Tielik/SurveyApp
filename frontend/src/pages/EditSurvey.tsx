@@ -210,7 +210,7 @@ export default function EditSurvey() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
@@ -235,7 +235,7 @@ export default function EditSurvey() {
                 </Alert>
               )}
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2 items-end">
                 <div className="space-y-2">
                   <Label htmlFor="title">Tytuł</Label>
                   <Input
@@ -253,7 +253,9 @@ export default function EditSurvey() {
                       Widoczna do głosowania po zapisaniu
                     </span>
                   </Label>
-                  <Switch checked={isActive} onCheckedChange={setIsActive} />
+                  <div className="flex items-center">
+                    <Switch checked={isActive} onCheckedChange={setIsActive} />
+                  </div>
                 </div>
               </div>
 
@@ -318,7 +320,7 @@ export default function EditSurvey() {
                           </div>
                           <div className="space-y-2">
                             {question.choices.map((choice, choiceIndex) => (
-                              <div key={choice.id} className="flex items-center gap-2">
+                              <div key={choice.id} className="flex items-center gap-2 ps-5 pe-3">
                                 <Input
                                   value={choice.text}
                                   onChange={(e) =>

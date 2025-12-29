@@ -136,7 +136,7 @@ export default function CreateSurvey() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
@@ -144,9 +144,6 @@ export default function CreateSurvey() {
               <ArrowLeft className="h-4 w-4" />
               Wróć do panelu
             </Link>
-          </Button>
-          <Button asChild variant="link">
-            <Link to="/dashboard">Podgląd ankiet</Link>
           </Button>
         </div>
 
@@ -164,14 +161,14 @@ export default function CreateSurvey() {
                 </Alert>
               )}
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2 items-end">
                 <div className="space-y-2">
                   <Label htmlFor="title">Tytuł</Label>
                   <Input
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Nps. Badanie satysfakcji"
+                    placeholder="Np. Badanie satysfakcji"
                     required
                   />
                 </div>
@@ -182,7 +179,9 @@ export default function CreateSurvey() {
                       Widoczna do głosowania po zapisaniu
                     </span>
                   </Label>
-                  <Switch checked={isActive} onCheckedChange={setIsActive} />
+                  <div className="flex items-center">
+                    <Switch checked={isActive} onCheckedChange={setIsActive} />
+                  </div>
                 </div>
               </div>
 
@@ -199,7 +198,7 @@ export default function CreateSurvey() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Pytania</h3>
-                  <Button type="button" variant="secondary" size="sm" onClick={addQuestion}>
+                  <Button type="button" variant="outline" size="sm" onClick={addQuestion}>
                     <Plus className="mr-2 h-4 w-4" />
                     Dodaj pytanie
                   </Button>
@@ -247,7 +246,7 @@ export default function CreateSurvey() {
                           </div>
                           <div className="space-y-2">
                             {question.choices.map((choice, choiceIndex) => (
-                              <div key={choice.id} className="flex items-center gap-2">
+                              <div key={choice.id} className="flex items-center gap-2 ps-5 pe-3">
                                 <Input
                                   value={choice.text}
                                   onChange={(e) =>
