@@ -278,7 +278,7 @@ def send_verification_email(user_email, token):
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user_email])
 
     # POST /api/surveys/{id}/rate/
-    @action(detail=True, methods=["post"], permission_classes=[permissions.AllowAny])
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
     def rate(self, request, pk=None):
         """
         Przyjmuje oceny 1–5 dla 1–5 pytań.
