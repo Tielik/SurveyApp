@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import type { FormEvent } from "react"
+import { Link } from "react-router-dom"
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
-import { toast } from "sonner"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -10,165 +9,82 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { surveyService } from "@/services/survey-service"
-import type { CreateChoicePayload } from "@/types/survey"
+import type { QuestionDraft } from "./CreateSurveyAction"
 
-type ChoiceDraft = { id: string; text: string }
-type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[] }
+type Props = {
+  title: string
+  description: string
+  isActive: boolean
+  questions: QuestionDraft[]
+  submitting: boolean
+  error: string | null
+  setTitle: (value: string) => void
+  setDescription: (value: string) => void
+  setIsActive: (value: boolean) => void
+  handleQuestionChange: (id: string, text: string) => void
+  handleChoiceChange: (questionId: string, choiceId: string, text: string) => void
+  addQuestion: () => void
+  removeQuestion: (id: string) => void
+  addChoice: (questionId: string) => void
+  removeChoice: (questionId: string, choiceId: string) => void
+  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
+}
 
-const createId = () => crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
-
-const createEmptyChoice = (): ChoiceDraft => ({ id: createId(), text: "" })
-const createEmptyQuestion = (): QuestionDraft => ({
-  id: createId(),
-  text: "",
-  choices: [createEmptyChoice(), createEmptyChoice()],
-})
-
-export default function CreateSurvey() {
-  const navigate = useNavigate()
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [isActive, setIsActive] = useState(false)
-  const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const hasToken = useMemo(() => Boolean(localStorage.getItem("token")), [])
-
-  useEffect(() => {
-    if (!hasToken) {
-      navigate("/")
-    }
-  }, [hasToken, navigate])
-
-  const handleQuestionChange = (id: string, text: string) => {
-    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, text } : q)))
-  }
-
-  const handleChoiceChange = (questionId: string, choiceId: string, text: string) => {
-    setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === questionId
-          ? { ...q, choices: q.choices.map((c) => (c.id === choiceId ? { ...c, text } : c)) }
-          : q,
-      ),
-    )
-  }
-
-  const addQuestion = () => setQuestions((prev) => [...prev, createEmptyQuestion()])
-
-  const removeQuestion = (id: string) => {
-    setQuestions((prev) => (prev.length === 1 ? prev : prev.filter((q) => q.id !== id)))
-  }
-
-  const addChoice = (questionId: string) => {
-    setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === questionId ? { ...q, choices: [...q.choices, createEmptyChoice()] } : q,
-      ),
-    )
-  }
-
-  const removeChoice = (questionId: string, choiceId: string) => {
-    setQuestions((prev) =>
-      prev.map((q) => {
-        if (q.id !== questionId) return q
-        if (q.choices.length <= 2) return q
-        return { ...q, choices: q.choices.filter((c) => c.id !== choiceId) }
-      }),
-    )
-  }
-
-  const validateForm = () => {
-    if (!title.trim()) return "Podaj tytuł ankiety."
-    if (questions.some((q) => !q.text.trim())) return "Każde pytanie musi mieć treść."
-    if (questions.some((q) => q.choices.filter((c) => c.text.trim()).length < 2)) {
-      return "Każde pytanie musi mieć co najmniej dwie odpowiedzi."
-    }
-    return null
-  }
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    setError(null)
-
-    const validationError = validateForm()
-    if (validationError) {
-      setError(validationError)
-      toast.error(validationError)
-      return
-    }
-
-    setSubmitting(true)
-    try {
-      const survey = await surveyService.createSurvey({ title, description, is_active: isActive })
-
-      for (const question of questions) {
-        const questionResponse = await surveyService.createQuestion({
-          survey: survey.id,
-          question_text: question.text.trim(),
-        })
-
-        const choices: CreateChoicePayload[] = question.choices
-          .filter((choice) => choice.text.trim())
-          .map((choice) => ({
-            question: questionResponse.id,
-            choice_text: choice.text.trim(),
-          }))
-
-        for (const choice of choices) {
-          await surveyService.createChoice(choice)
-        }
-      }
-
-      toast.success("Ankieta utworzona", {
-        description: `Kod dostępu: ${survey.access_code}`,
-      })
-      navigate("/dashboard")
-    } catch (err) {
-      console.error("Failed to create survey", err)
-      setError("Nie udało się utworzyć ankiety. Spróbuj ponownie.")
-      toast.error("Nie udało się utworzyć ankiety.")
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
+export default function CreateSurveyView({
+  title,
+  description,
+  isActive,
+  questions,
+  submitting,
+  error,
+  setTitle,
+  setDescription,
+  setIsActive,
+  handleQuestionChange,
+  handleChoiceChange,
+  addQuestion,
+  removeQuestion,
+  addChoice,
+  removeChoice,
+  handleSubmit,
+}: Props) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 px-4 py-10">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
             <Link to="/dashboard">
               <ArrowLeft className="h-4 w-4" />
-              Wróć do panelu
+              WrÆˆŽÅ do panelu
             </Link>
+          </Button>
+          <Button asChild variant="link">
+            <Link to="/dashboard">Podglad ankiet</Link>
           </Button>
         </div>
 
         <Card className="backdrop-blur">
           <CardHeader>
-            <CardTitle>Stwórz ankietę</CardTitle>
-            <CardDescription>Dodaj pytania i odpowiedzi, a następnie opublikuj.</CardDescription>
+            <CardTitle>Stworz ankiete</CardTitle>
+            <CardDescription>Dodaj pytania i odpowiedzi, a nastepnie opublikuj.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-8" onSubmit={handleSubmit}>
               {error && (
                 <Alert variant="destructive">
-                  <AlertTitle>Błąd</AlertTitle>
+                  <AlertTitle>Blad</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
-              <div className="grid gap-4 md:grid-cols-2 items-end">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Tytuł</Label>
+                  <Label htmlFor="title">Tytul</Label>
                   <Input
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Np. Badanie satysfakcji"
+                    placeholder="Nps. Badanie satysfakcji"
                     required
                   />
                 </div>
@@ -176,12 +92,10 @@ export default function CreateSurvey() {
                   <Label className="flex items-center justify-between">
                     <span>Opublikowana</span>
                     <span className="text-xs text-muted-foreground">
-                      Widoczna do głosowania po zapisaniu
+                      Widoczna do glosowania po zapisaniu
                     </span>
                   </Label>
-                  <div className="flex items-center">
-                    <Switch checked={isActive} onCheckedChange={setIsActive} />
-                  </div>
+                  <Switch checked={isActive} onCheckedChange={setIsActive} />
                 </div>
               </div>
 
@@ -191,14 +105,14 @@ export default function CreateSurvey() {
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Krótko opisz cel ankiety..."
+                  placeholder="Krotko opisz cel ankiety..."
                 />
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Pytania</h3>
-                  <Button type="button" variant="outline" size="sm" onClick={addQuestion}>
+                  <Button type="button" variant="secondary" size="sm" onClick={addQuestion}>
                     <Plus className="mr-2 h-4 w-4" />
                     Dodaj pytanie
                   </Button>
@@ -217,7 +131,7 @@ export default function CreateSurvey() {
                             <Input
                               value={question.text}
                               onChange={(e) => handleQuestionChange(question.id, e.target.value)}
-                              placeholder="Treść pytania"
+                              placeholder="Tresc pytania"
                             />
                           </div>
                           <Button
@@ -241,18 +155,18 @@ export default function CreateSurvey() {
                               onClick={() => addChoice(question.id)}
                             >
                               <Plus className="mr-2 h-4 w-4" />
-                              Dodaj odpowiedź
+                              Dodaj odpowied‘­
                             </Button>
                           </div>
                           <div className="space-y-2">
                             {question.choices.map((choice, choiceIndex) => (
-                              <div key={choice.id} className="flex items-center gap-2 ps-5 pe-3">
+                              <div key={choice.id} className="flex items-center gap-2">
                                 <Input
                                   value={choice.text}
                                   onChange={(e) =>
                                     handleChoiceChange(question.id, choice.id, e.target.value)
                                   }
-                                  placeholder={`Odpowiedź ${choiceIndex + 1}`}
+                                  placeholder={`Odpowiedz ${choiceIndex + 1}`}
                                 />
                                 <Button
                                   type="button"
@@ -283,12 +197,12 @@ export default function CreateSurvey() {
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Utwórz ankietę
+                      Utworz ankietŽt
                     </>
                   )}
                 </Button>
                 <p className="text-sm text-muted-foreground">
-                  Po utworzeniu otrzymasz kod dostępu do głosowania.
+                  Po utworzeniu otrzymasz kod dosetpu do glosowania.
                 </p>
               </div>
             </form>
