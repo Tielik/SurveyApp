@@ -6,12 +6,11 @@ import { toast } from "sonner"
 import { hasAuthToken } from "@/helpers/auth"
 import { createDraftId, validateSurveyDraft } from "@/helpers/survey-draft"
 import { surveyService } from "@/services/survey-service"
-import type { SurveyDetail } from "@/types/survey"
+import type { SurveyDetail, CreateSurveyPayload } from "@/types/survey"
 import type { SurveyIdParams } from "@/types/router"
 
 export type ChoiceDraft = { id: string; text: string; originalId?: number }
 export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[]; originalId?: number }
-// 1. Definicja typu kolorów
 export type ThemeColors = { first: string; second: string; third: string }
 
 const mapSurveyToDraft = (survey: SurveyDetail): QuestionDraft[] =>
@@ -34,14 +33,11 @@ export const useEditSurveyAction = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
-  
-  // 2. Stan kolorów
   const [themeColors, setThemeColors] = useState<ThemeColors>({
     first: "#f8fafc",
     second: "#eef2ff",
     third: "#F3F4F6"
   })
-
   const [questions, setQuestions] = useState<QuestionDraft[]>([])
   const [originalQuestionIds, setOriginalQuestionIds] = useState<number[]>([])
   const [originalChoiceIds, setOriginalChoiceIds] = useState<number[]>([])
@@ -63,12 +59,17 @@ export const useEditSurveyAction = () => {
         setDescription(data.description || "")
         setIsActive(data.is_active)
         
-        // 3. Pobranie kolorów z API
         if (data) {
+           const dataWithColors = data as SurveyDetail & { 
+              theme_first_color?: string; 
+              theme_second_color?: string; 
+              theme_third_color?: string; 
+           };
+
            setThemeColors({
-             first: (data as any).theme_first_color || "#f8fafc",
-             second: (data as any).theme_second_color || "#eef2ff",
-             third: (data as any).theme_third_color || "#F3F4F6",
+             first: dataWithColors.theme_first_color || "#3B82F6",
+             second: dataWithColors.theme_second_color || "#10B981",
+             third: dataWithColors.theme_third_color || "#F3F4F6",
            })
         }
 
@@ -141,15 +142,20 @@ export const useEditSurveyAction = () => {
     setSubmitting(true)
 
     try {
+      type ExtendedUpdatePayload = CreateSurveyPayload & {
+        theme_first_color: string;
+        theme_second_color: string;
+        theme_third_color: string;
+      };
+
       await surveyService.updateSurvey(Number(id), {
         title,
         description,
         is_active: isActive,
-        // 4. Wysłanie kolorów do API
         theme_first_color: themeColors.first,
         theme_second_color: themeColors.second,
         theme_third_color: themeColors.third,
-      } as any)
+      } as ExtendedUpdatePayload)
 
       const savedQuestionIds: number[] = []
       const savedChoiceIds: number[] = []
@@ -212,7 +218,7 @@ export const useEditSurveyAction = () => {
     title,
     description,
     isActive,
-    themeColors, // Eksport stanu
+    themeColors,
     questions,
     loading,
     submitting,
@@ -220,7 +226,7 @@ export const useEditSurveyAction = () => {
     setTitle,
     setDescription,
     setIsActive,
-    setThemeColors, // Eksport settera
+    setThemeColors,
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,

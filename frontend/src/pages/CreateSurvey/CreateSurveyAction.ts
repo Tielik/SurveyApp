@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { hasAuthToken } from "@/helpers/auth"
 import { createDraftId, validateSurveyDraft } from "@/helpers/survey-draft"
 import { surveyService } from "@/services/survey-service"
-import type { CreateChoicePayload } from "@/types/survey"
+import type { CreateChoicePayload, CreateSurveyPayload } from "@/types/survey"
 
 export type ChoiceDraft = { id: string; text: string }
 export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[] }
@@ -24,14 +24,11 @@ export const useCreateSurveyAction = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
-  
-  // 1. Dodano stan kolorów
   const [themeColors, setThemeColors] = useState<ThemeColors>({
-    first: "#f8fafc",
-    second: "#eef2ff",
+    first: "#3B82F6",
+    second: "#10B981",
     third: "#F3F4F6"
   })
-
   const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -93,6 +90,12 @@ export const useCreateSurveyAction = () => {
 
     setSubmitting(true)
     try {
+      type ExtendedCreatePayload = CreateSurveyPayload & {
+        theme_first_color: string;
+        theme_second_color: string;
+        theme_third_color: string;
+      };
+
       const survey = await surveyService.createSurvey({ 
         title, 
         description, 
@@ -100,7 +103,7 @@ export const useCreateSurveyAction = () => {
         theme_first_color: themeColors.first,
         theme_second_color: themeColors.second,
         theme_third_color: themeColors.third,
-      } as any)
+      } as ExtendedCreatePayload)
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({

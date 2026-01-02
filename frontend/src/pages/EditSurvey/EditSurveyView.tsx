@@ -24,7 +24,6 @@ const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
 
   useEffect(() => {
     const element = inputRef.current;
-
     if (!element || isInitialized.current || (element as any).jscolor) {
       return
     }
@@ -39,13 +38,13 @@ const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
       closeButton: true,
       closeText: 'OK',
       onInput: function () {
-        // @ts-ignore
+        // @ts-expect-error
         onChange(this.toHEXString())
       }
     }
 
     isInitialized.current = true;
-    // @ts-ignore
+    // @ts-expect-error
     new window.jscolor(element, options)
   }, [])
 
@@ -169,7 +168,7 @@ export default function EditSurveyView({
                     </span>
                   </Label>
                   <div className="flex items-center pt-2">
-                     <Switch checked={isActive} onCheckedChange={setIsActive} />
+                    <Switch checked={isActive} onCheckedChange={setIsActive} />
                   </div>
                 </div>
               </div>
@@ -185,41 +184,36 @@ export default function EditSurveyView({
               </div>
 
               <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
-                <Label>Kolor tła ankiety</Label>
+                <Label>Kolorystyka ankiety</Label>
                 <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
-                    <div className="flex items-center gap-3">
-                      <div className="w-full">
-                        <JscolorPicker
-                          value={themeColors.first}
-                          onChange={(c) => setThemeColors(prev => ({ ...prev, first: c }))}
-                        />
-                      </div>
+                    <div className="w-full">
+                      <JscolorPicker
+                        value={themeColors.first}
+                        onChange={(c) => setThemeColors(prev => ({ ...prev, first: c }))}
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 2 (Środek)</Label>
-                    <div className="flex items-center gap-3">
-                      <div className="w-full">
-                        <JscolorPicker
-                          value={themeColors.second}
-                          onChange={(c) => setThemeColors(prev => ({ ...prev, second: c }))}
-                        />
-                      </div>
+                    <div className="w-full">
+                      <JscolorPicker
+                        value={themeColors.second}
+                        onChange={(c) => setThemeColors(prev => ({ ...prev, second: c }))}
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 3 (Dół-Prawo)</Label>
-                    <div className="flex items-center gap-3">
-                      <div className="w-full">
-                        <JscolorPicker
-                          value={themeColors.third}
-                          onChange={(c) => setThemeColors(prev => ({ ...prev, third: c }))}
-                        />
-                      </div>
+                    <div className="w-full">
+                      <JscolorPicker
+                        value={themeColors.third}
+                        onChange={(c) => setThemeColors(prev => ({ ...prev, third: c }))}
+                      />
                     </div>
                   </div>
 
