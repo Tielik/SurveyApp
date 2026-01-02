@@ -74,6 +74,8 @@ export const useVoteAction = () => {
         return { ...question, choices: updatedChoices }
       })
       setSurvey({ ...survey, questions: updatedQuestions })
+      //temp fix
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       const missingFromServer = err?.response?.data?.missing_questions
       if (Array.isArray(missingFromServer)) {
