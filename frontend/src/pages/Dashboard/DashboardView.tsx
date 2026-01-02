@@ -60,12 +60,12 @@ export default function DashboardView({
 
         {surveys.length === 0 ? (
           <div className="text-center py-20 bg-white/50 rounded-3xl border-2 border-dashed border-gray-300">
-            <p className="text-gray-400 text-lg">Brak ankiet. Utw¢rz pierwsza w kreatorze.</p>
+            <p className="text-gray-400 text-lg">Brak ankiet. Utwórz pierwsza w kreatorze.</p>
             <Link
               to="/surveys/create"
               className="mt-4 inline-flex px-6 py-3 rounded-lg bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700"
             >
-              Otw¢rz kreator
+              Otwórz kreator
             </Link>
           </div>
         ) : (
