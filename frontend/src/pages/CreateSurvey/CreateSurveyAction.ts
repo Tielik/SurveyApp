@@ -10,6 +10,7 @@ import type { CreateChoicePayload } from "@/types/survey"
 
 export type ChoiceDraft = { id: string; text: string }
 export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[] }
+export type ThemeColors = { first: string; second: string; third: string }
 
 const createEmptyChoice = (): ChoiceDraft => ({ id: createDraftId(), text: "" })
 const createEmptyQuestion = (): QuestionDraft => ({
@@ -23,6 +24,14 @@ export const useCreateSurveyAction = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
+  
+  // 1. Dodano stan kolorów
+  const [themeColors, setThemeColors] = useState<ThemeColors>({
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#F3F4F6"
+  })
+
   const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -84,7 +93,14 @@ export const useCreateSurveyAction = () => {
 
     setSubmitting(true)
     try {
-      const survey = await surveyService.createSurvey({ title, description, is_active: isActive })
+      const survey = await surveyService.createSurvey({ 
+        title, 
+        description, 
+        is_active: isActive,
+        theme_first_color: themeColors.first,
+        theme_second_color: themeColors.second,
+        theme_third_color: themeColors.third,
+      } as any)
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({
@@ -105,13 +121,13 @@ export const useCreateSurveyAction = () => {
       }
 
       toast.success("Ankieta utworzona", {
-        description: `Kod dostŽtpu: ${survey.access_code}`,
+        description: `Kod dostępu: ${survey.access_code}`,
       })
       navigate("/dashboard")
     } catch (err) {
       console.error("Failed to create survey", err)
-      setError("Nie udalo sie utworzyc ankiety. Sprobuj ponownie.")
-      toast.error("Nie udalo sie utworzyc ankiety.")
+      setError("Nie udało się utworzyć ankiety. Spróbuj ponownie.")
+      toast.error("Nie udało się utworzyć ankiety.")
     } finally {
       setSubmitting(false)
     }
@@ -121,12 +137,14 @@ export const useCreateSurveyAction = () => {
     title,
     description,
     isActive,
+    themeColors,
     questions,
     submitting,
     error,
     setTitle,
     setDescription,
     setIsActive,
+    setThemeColors,
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,

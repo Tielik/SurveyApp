@@ -1,6 +1,8 @@
-import type { FormEvent } from "react"
+import { useEffect, useRef } from "react"
+import type { FormEvent, Dispatch, SetStateAction } from "react"
 import { Link } from "react-router-dom"
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
+import '@eastdesire/jscolor'
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -9,12 +11,68 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import type { QuestionDraft } from "./EditSurveyAction"
+import type { QuestionDraft, ThemeColors } from "./EditSurveyAction"
+
+interface JscolorPickerProps {
+  value: string
+  onChange: (color: string) => void
+}
+
+const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const isInitialized = useRef(false)
+
+  useEffect(() => {
+    const element = inputRef.current;
+
+    if (!element || isInitialized.current || (element as any).jscolor) {
+      return
+    }
+
+    const options = {
+      value: value,
+      format: 'hex',
+      previewSize: 40,
+      borderRadius: 4,
+      padding: 8,
+      width: 200,
+      closeButton: true,
+      closeText: 'OK',
+      onInput: function () {
+        // @ts-ignore
+        onChange(this.toHEXString())
+      }
+    }
+
+    isInitialized.current = true;
+    // @ts-ignore
+    new window.jscolor(element, options)
+  }, [])
+
+  useEffect(() => {
+    if (inputRef.current && (inputRef.current as any).jscolor && value) {
+      const picker = (inputRef.current as any).jscolor;
+      if (picker.toHEXString().toLowerCase() !== value.toLowerCase()) {
+        picker.fromString(value)
+      }
+    }
+  }, [value])
+
+  return (
+    <div className="flex flex-col gap-1">
+      <input
+        ref={inputRef}
+        className="w-full h-9 border border-gray-300 rounded-md px-2 font-mono text-xs uppercase cursor-pointer text-center"
+      />
+    </div>
+  )
+}
 
 type Props = {
   title: string
   description: string
   isActive: boolean
+  themeColors: ThemeColors
   questions: QuestionDraft[]
   loading: boolean
   submitting: boolean
@@ -22,6 +80,7 @@ type Props = {
   setTitle: (value: string) => void
   setDescription: (value: string) => void
   setIsActive: (value: boolean) => void
+  setThemeColors: Dispatch<SetStateAction<ThemeColors>>
   handleQuestionChange: (id: string, text: string) => void
   handleChoiceChange: (questionId: string, choiceId: string, text: string) => void
   addQuestion: () => void
@@ -35,6 +94,7 @@ export default function EditSurveyView({
   title,
   description,
   isActive,
+  themeColors,
   questions,
   loading,
   submitting,
@@ -42,6 +102,7 @@ export default function EditSurveyView({
   setTitle,
   setDescription,
   setIsActive,
+  setThemeColors,
   handleQuestionChange,
   handleChoiceChange,
   addQuestion,
@@ -59,34 +120,39 @@ export default function EditSurveyView({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 px-4 py-10">
+    <div 
+      className="min-h-screen px-4 py-10 transition-colors duration-500 ease-in-out"
+      style={{
+        background: `linear-gradient(to bottom right, ${themeColors.first}, ${themeColors.second}, ${themeColors.third})`
+      }}
+    >
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
             <Link to="/dashboard">
               <ArrowLeft className="h-4 w-4" />
-              WrÆˆŽÅ do panelu
+              Wróć do panelu
             </Link>
           </Button>
         </div>
 
         <Card className="backdrop-blur">
           <CardHeader>
-            <CardTitle>Edytuj ankietŽt</CardTitle>
-            <CardDescription>Zaktualizuj tresc i odpowiedzi, nastepnie zapisz.</CardDescription>
+            <CardTitle>Edytuj ankietę</CardTitle>
+            <CardDescription>Zaktualizuj treść i odpowiedzi, następnie zapisz.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-8" onSubmit={handleSubmit}>
               {error && (
                 <Alert variant="destructive">
-                  <AlertTitle>Blad</AlertTitle>
+                  <AlertTitle>Błąd</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Tytul</Label>
+                  <Label htmlFor="title">Tytuł</Label>
                   <Input
                     id="title"
                     value={title}
@@ -99,10 +165,12 @@ export default function EditSurveyView({
                   <Label className="flex items-center justify-between">
                     <span>Opublikowana</span>
                     <span className="text-xs text-muted-foreground">
-                      Widoczna do glosowania po zapisaniu
+                      Widoczna do głosowania po zapisaniu
                     </span>
                   </Label>
-                  <Switch checked={isActive} onCheckedChange={setIsActive} />
+                  <div className="flex items-center pt-2">
+                     <Switch checked={isActive} onCheckedChange={setIsActive} />
+                  </div>
                 </div>
               </div>
 
@@ -112,8 +180,50 @@ export default function EditSurveyView({
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Krotko opisz cel ankiety..."
+                  placeholder="Krótko opisz cel ankiety..."
                 />
+              </div>
+
+              <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
+                <Label>Kolor tła ankiety</Label>
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-full">
+                        <JscolorPicker
+                          value={themeColors.first}
+                          onChange={(c) => setThemeColors(prev => ({ ...prev, first: c }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 2 (Środek)</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-full">
+                        <JscolorPicker
+                          value={themeColors.second}
+                          onChange={(c) => setThemeColors(prev => ({ ...prev, second: c }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 3 (Dół-Prawo)</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-full">
+                        <JscolorPicker
+                          value={themeColors.third}
+                          onChange={(c) => setThemeColors(prev => ({ ...prev, third: c }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
               </div>
 
               <div className="space-y-6">
@@ -138,7 +248,7 @@ export default function EditSurveyView({
                             <Input
                               value={question.text}
                               onChange={(e) => handleQuestionChange(question.id, e.target.value)}
-                              placeholder="Tresc pytania"
+                              placeholder="Treść pytania"
                             />
                           </div>
                           <Button
@@ -162,18 +272,18 @@ export default function EditSurveyView({
                               onClick={() => addChoice(question.id)}
                             >
                               <Plus className="mr-2 h-4 w-4" />
-                              Dodaj odpowiedz
+                              Dodaj odpowiedź
                             </Button>
                           </div>
                           <div className="space-y-2">
                             {question.choices.map((choice, choiceIndex) => (
-                              <div key={choice.id} className="flex items-center gap-2">
+                              <div key={choice.id} className="flex items-center gap-2 ps-5 pe-3">
                                 <Input
                                   value={choice.text}
                                   onChange={(e) =>
                                     handleChoiceChange(question.id, choice.id, e.target.value)
                                   }
-                                  placeholder={`Odpowiedz ${choiceIndex + 1}`}
+                                  placeholder={`Odpowiedź ${choiceIndex + 1}`}
                                 />
                                 <Button
                                   type="button"
@@ -204,12 +314,12 @@ export default function EditSurveyView({
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Zapisz ankiete
+                      Zapisz ankietę
                     </>
                   )}
                 </Button>
                 <p className="text-sm text-muted-foreground">
-                  Po zapisaniu zmiany beda widoczne w glosowaniu.
+                  Po zapisaniu zmiany będą widoczne w głosowaniu.
                 </p>
               </div>
             </form>

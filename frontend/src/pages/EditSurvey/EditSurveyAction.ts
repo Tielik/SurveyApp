@@ -11,6 +11,8 @@ import type { SurveyIdParams } from "@/types/router"
 
 export type ChoiceDraft = { id: string; text: string; originalId?: number }
 export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[]; originalId?: number }
+// 1. Definicja typu kolorów
+export type ThemeColors = { first: string; second: string; third: string }
 
 const mapSurveyToDraft = (survey: SurveyDetail): QuestionDraft[] =>
   survey.questions.map((q) => ({
@@ -32,6 +34,14 @@ export const useEditSurveyAction = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
+  
+  // 2. Stan kolorów
+  const [themeColors, setThemeColors] = useState<ThemeColors>({
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#F3F4F6"
+  })
+
   const [questions, setQuestions] = useState<QuestionDraft[]>([])
   const [originalQuestionIds, setOriginalQuestionIds] = useState<number[]>([])
   const [originalChoiceIds, setOriginalChoiceIds] = useState<number[]>([])
@@ -52,12 +62,22 @@ export const useEditSurveyAction = () => {
         setTitle(data.title)
         setDescription(data.description || "")
         setIsActive(data.is_active)
+        
+        // 3. Pobranie kolorów z API
+        if (data) {
+           setThemeColors({
+             first: (data as any).theme_first_color || "#f8fafc",
+             second: (data as any).theme_second_color || "#eef2ff",
+             third: (data as any).theme_third_color || "#F3F4F6",
+           })
+        }
+
         setQuestions(mapSurveyToDraft(data))
         setOriginalQuestionIds(data.questions.map((q) => q.id))
         setOriginalChoiceIds(data.questions.flatMap((q) => q.choices.map((c) => c.id)))
       })
       .catch(() => {
-        toast.error("Nie udalo sie pobrac ankiety.")
+        toast.error("Nie udało się pobrać ankiety.")
         navigate("/dashboard")
       })
       .finally(() => setLoading(false))
@@ -125,7 +145,11 @@ export const useEditSurveyAction = () => {
         title,
         description,
         is_active: isActive,
-      })
+        // 4. Wysłanie kolorów do API
+        theme_first_color: themeColors.first,
+        theme_second_color: themeColors.second,
+        theme_third_color: themeColors.third,
+      } as any)
 
       const savedQuestionIds: number[] = []
       const savedChoiceIds: number[] = []
@@ -177,8 +201,8 @@ export const useEditSurveyAction = () => {
       navigate("/dashboard")
     } catch (err) {
       console.error("Failed to update survey", err)
-      setError("Nie udalo sie zapisac ankiety. Sprobuj ponownie.")
-      toast.error("Nie udalo sie zapisac ankiety.")
+      setError("Nie udało się zapisać ankiety. Spróbuj ponownie.")
+      toast.error("Nie udało się zapisać ankiety.")
     } finally {
       setSubmitting(false)
     }
@@ -188,6 +212,7 @@ export const useEditSurveyAction = () => {
     title,
     description,
     isActive,
+    themeColors, // Eksport stanu
     questions,
     loading,
     submitting,
@@ -195,6 +220,7 @@ export const useEditSurveyAction = () => {
     setTitle,
     setDescription,
     setIsActive,
+    setThemeColors, // Eksport settera
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,
