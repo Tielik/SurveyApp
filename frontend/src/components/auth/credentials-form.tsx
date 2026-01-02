@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Loader2, LockKeyhole, User } from "lucide-react"
 
+import { RecaptchaWidget } from "@/components/recaptcha"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +12,7 @@ import type { Credentials } from "@/types/auth"
 type CredentialsFormProps = {
   submitLabel: string
   loadingLabel: string
-  onSubmit: (values: Credentials) => Promise<void>
+  onSubmit: (values: Credentials, recaptchaToken: string) => Promise<void>
   error?: string | null
   loading?: boolean
   usernameAutocomplete?: string
@@ -30,6 +31,8 @@ export function CredentialsForm({
   className,
 }: CredentialsFormProps) {
   const [values, setValues] = useState<Credentials>({ username: "", password: "" })
+  const [recaptchaToken, setRecaptchaToken] = useState("")
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null)
 
   const handleChange = (field: keyof Credentials) => (value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }))
@@ -37,10 +40,15 @@ export function CredentialsForm({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    await onSubmit(values)
+    if (!recaptchaToken) {
+      setRecaptchaError("Potwierdz reCAPTCHA.")
+      return
+    }
+    setRecaptchaError(null)
+    await onSubmit(values, recaptchaToken)
   }
 
-  const isDisabled = loading || !values.username || !values.password
+  const isDisabled = loading || !values.username || !values.password || !recaptchaToken
 
   return (
     <form onSubmit={handleSubmit} className={cn("space-y-6", className)}>
@@ -86,6 +94,19 @@ export function CredentialsForm({
             />
           </div>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <RecaptchaWidget
+          onVerify={(token) => {
+            setRecaptchaToken(token)
+            if (token) setRecaptchaError(null)
+          }}
+          onExpired={() => setRecaptchaToken("")}
+          onError={() => setRecaptchaError("Blad reCAPTCHA. Sprobuj ponownie.")}
+          className="inline-block"
+        />
+        {recaptchaError && <p className="text-sm text-red-500">{recaptchaError}</p>}
       </div>
 
       <Button type="submit" className="w-full" disabled={isDisabled}>

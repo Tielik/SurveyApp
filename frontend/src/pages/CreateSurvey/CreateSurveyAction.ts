@@ -26,6 +26,8 @@ export const useCreateSurveyAction = () => {
   const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [recaptchaToken, setRecaptchaToken] = useState("")
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!hasAuthToken()) {
@@ -81,10 +83,19 @@ export const useCreateSurveyAction = () => {
       toast.error(validationError)
       return
     }
+    if (!recaptchaToken) {
+      setRecaptchaError("Potwierdz reCAPTCHA.")
+      return
+    }
 
     setSubmitting(true)
     try {
-      const survey = await surveyService.createSurvey({ title, description, is_active: isActive })
+      const survey = await surveyService.createSurvey({
+        title,
+        description,
+        is_active: isActive,
+        recaptcha_token: recaptchaToken,
+      })
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({
@@ -124,9 +135,13 @@ export const useCreateSurveyAction = () => {
     questions,
     submitting,
     error,
+    recaptchaToken,
+    recaptchaError,
     setTitle,
     setDescription,
     setIsActive,
+    setRecaptchaToken,
+    setRecaptchaError,
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,
