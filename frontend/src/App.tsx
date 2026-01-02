@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from './pages/Login'
-import Dashboard from './pages/dashboard'
+import Dashboard from './pages/Dashboard'
 import Vote from './pages/Vote'
 import Register from './pages/Register'
 import CreateSurvey from './pages/CreateSurvey'

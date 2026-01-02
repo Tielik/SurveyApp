@@ -1,7 +1,11 @@
+<<<<<<< HEAD:frontend/src/pages/CreateSurvey.tsx
 import { useEffect, useMemo, useState, useRef } from "react"
 import { useNavigate, Link } from "react-router-dom"
+=======
+import type { FormEvent } from "react"
+import { Link } from "react-router-dom"
+>>>>>>> 2216ec5d86d792325e9961a1e2682b9ac0ab5ee2:frontend/src/pages/EditSurvey/EditSurveyView.tsx
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
-import { toast } from "sonner"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -10,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+<<<<<<< HEAD:frontend/src/pages/CreateSurvey.tsx
 import { surveyService } from "@/services/survey-service"
 import type { CreateChoicePayload } from "@/types/survey"
 import '@eastdesire/jscolor'
@@ -70,10 +75,31 @@ const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
     </div>
   )
 }
+=======
+import type { QuestionDraft } from "./EditSurveyAction"
+>>>>>>> 2216ec5d86d792325e9961a1e2682b9ac0ab5ee2:frontend/src/pages/EditSurvey/EditSurveyView.tsx
 
-type ChoiceDraft = { id: string; text: string }
-type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[] }
+type Props = {
+  title: string
+  description: string
+  isActive: boolean
+  questions: QuestionDraft[]
+  loading: boolean
+  submitting: boolean
+  error: string | null
+  setTitle: (value: string) => void
+  setDescription: (value: string) => void
+  setIsActive: (value: boolean) => void
+  handleQuestionChange: (id: string, text: string) => void
+  handleChoiceChange: (questionId: string, choiceId: string, text: string) => void
+  addQuestion: () => void
+  removeQuestion: (id: string) => void
+  addChoice: (questionId: string) => void
+  removeChoice: (questionId: string, choiceId: string) => void
+  handleSubmit: (event: FormEvent<HTMLFormElement>) => void
+}
 
+<<<<<<< HEAD:frontend/src/pages/CreateSurvey.tsx
 const createId = () => crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
 
 const createEmptyChoice = (): ChoiceDraft => ({ id: createId(), text: "" })
@@ -215,33 +241,64 @@ export default function CreateSurvey() {
         background: `linear-gradient(to bottom right, ${themeColors.first}, ${themeColors.second}, ${themeColors.third})`
       }}
     >
+=======
+export default function EditSurveyView({
+  title,
+  description,
+  isActive,
+  questions,
+  loading,
+  submitting,
+  error,
+  setTitle,
+  setDescription,
+  setIsActive,
+  handleQuestionChange,
+  handleChoiceChange,
+  addQuestion,
+  removeQuestion,
+  addChoice,
+  removeChoice,
+  handleSubmit,
+}: Props) {
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 px-4 py-10">
+>>>>>>> 2216ec5d86d792325e9961a1e2682b9ac0ab5ee2:frontend/src/pages/EditSurvey/EditSurveyView.tsx
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
             <Link to="/dashboard">
               <ArrowLeft className="h-4 w-4" />
-              Wróć do panelu
+              WrÆˆŽÅ do panelu
             </Link>
           </Button>
         </div>
 
         <Card className="backdrop-blur">
           <CardHeader>
-            <CardTitle>Stwórz ankietę</CardTitle>
-            <CardDescription>Dodaj pytania i odpowiedzi, a następnie opublikuj.</CardDescription>
+            <CardTitle>Edytuj ankietŽt</CardTitle>
+            <CardDescription>Zaktualizuj tresc i odpowiedzi, nastepnie zapisz.</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-8" onSubmit={handleSubmit}>
               {error && (
                 <Alert variant="destructive">
-                  <AlertTitle>Błąd</AlertTitle>
+                  <AlertTitle>Blad</AlertTitle>
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
-              <div className="grid gap-4 md:grid-cols-2 items-end">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Tytuł</Label>
+                  <Label htmlFor="title">Tytul</Label>
                   <Input
                     id="title"
                     value={title}
@@ -254,12 +311,10 @@ export default function CreateSurvey() {
                   <Label className="flex items-center justify-between">
                     <span>Opublikowana</span>
                     <span className="text-xs text-muted-foreground">
-                      Widoczna do głosowania po zapisaniu
+                      Widoczna do glosowania po zapisaniu
                     </span>
                   </Label>
-                  <div className="flex items-center">
-                    <Switch checked={isActive} onCheckedChange={setIsActive} />
-                  </div>
+                  <Switch checked={isActive} onCheckedChange={setIsActive} />
                 </div>
               </div>
 
@@ -269,7 +324,7 @@ export default function CreateSurvey() {
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Krótko opisz cel ankiety..."
+                  placeholder="Krotko opisz cel ankiety..."
                 />
               </div>
 
@@ -347,7 +402,7 @@ export default function CreateSurvey() {
                             <Input
                               value={question.text}
                               onChange={(e) => handleQuestionChange(question.id, e.target.value)}
-                              placeholder="Treść pytania"
+                              placeholder="Tresc pytania"
                             />
                           </div>
                           <Button
@@ -371,18 +426,18 @@ export default function CreateSurvey() {
                               onClick={() => addChoice(question.id)}
                             >
                               <Plus className="mr-2 h-4 w-4" />
-                              Dodaj odpowiedź
+                              Dodaj odpowiedz
                             </Button>
                           </div>
                           <div className="space-y-2">
                             {question.choices.map((choice, choiceIndex) => (
-                              <div key={choice.id} className="flex items-center gap-2 ps-5 pe-3">
+                              <div key={choice.id} className="flex items-center gap-2">
                                 <Input
                                   value={choice.text}
                                   onChange={(e) =>
                                     handleChoiceChange(question.id, choice.id, e.target.value)
                                   }
-                                  placeholder={`Odpowiedź ${choiceIndex + 1}`}
+                                  placeholder={`Odpowiedz ${choiceIndex + 1}`}
                                 />
                                 <Button
                                   type="button"
@@ -413,12 +468,12 @@ export default function CreateSurvey() {
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Utwórz ankietę
+                      Zapisz ankiete
                     </>
                   )}
                 </Button>
                 <p className="text-sm text-muted-foreground">
-                  Po utworzeniu otrzymasz kod dostępu do głosowania.
+                  Po zapisaniu zmiany beda widoczne w glosowaniu.
                 </p>
               </div>
             </form>
