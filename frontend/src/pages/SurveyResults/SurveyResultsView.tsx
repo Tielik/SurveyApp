@@ -38,7 +38,7 @@ export default function SurveyResultsView({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-wide text-indigo-500 mb-1">Podglad wynikow</p>
