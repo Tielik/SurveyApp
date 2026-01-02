@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
 import { toast } from "sonner"
@@ -12,6 +12,64 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { surveyService } from "@/services/survey-service"
 import type { CreateChoicePayload } from "@/types/survey"
+import '@eastdesire/jscolor'
+
+interface JscolorPickerProps {
+  value: string
+  onChange: (color: string) => void
+}
+
+const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const isInitialized = useRef(false) // Flaga zabezpieczająca
+
+  useEffect(() => {
+    const element = inputRef.current;
+
+    // Zabezpieczenie przed podwójną inicjalizacją
+    if (!element || isInitialized.current || (element as any).jscolor) {
+      return
+    }
+
+    const options = {
+      value: value,
+      format: 'hex',
+      previewSize: 40,
+      borderRadius: 4,
+      padding: 8,
+      width: 200,
+      closeButton: true,
+      closeText: 'OK',
+      onInput: function () {
+        // @ts-ignore
+        onChange(this.toHEXString())
+      }
+    }
+
+    isInitialized.current = true;
+    // @ts-ignore
+    new window.jscolor(element, options)
+  }, [])
+
+  useEffect(() => {
+    if (inputRef.current && (inputRef.current as any).jscolor && value) {
+      const picker = (inputRef.current as any).jscolor;
+      // Aktualizujemy tylko jeśli wartości są różne (ignorując wielkość liter)
+      if (picker.toHEXString().toLowerCase() !== value.toLowerCase()) {
+        picker.fromString(value)
+      }
+    }
+  }, [value])
+
+  return (
+    <div className="flex flex-col gap-1">
+      <input
+        ref={inputRef}
+        className="w-full h-9 border border-gray-300 rounded-md px-2 font-mono text-xs uppercase cursor-pointer text-center"
+      />
+    </div>
+  )
+}
 
 type ChoiceDraft = { id: string; text: string }
 type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[] }
@@ -30,6 +88,11 @@ export default function CreateSurvey() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
+  const [themeColors, setThemeColors] = useState({
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#F3F4F6"
+  })
   const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -102,7 +165,17 @@ export default function CreateSurvey() {
 
     setSubmitting(true)
     try {
-      const survey = await surveyService.createSurvey({ title, description, is_active: isActive })
+      const survey = await surveyService.createSurvey({
+        title,
+        description,
+        is_active: isActive,
+        // @ts-ignore - jeśli typy nie są zaktualizowane
+        theme_primary_color: themeColors.first,
+        // @ts-ignore
+        theme_secondary_color: themeColors.second,
+        // @ts-ignore
+        theme_background_color: themeColors.third
+      })
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({
@@ -136,7 +209,12 @@ export default function CreateSurvey() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
+    <div 
+      className="min-h-screen py-10 px-4 transition-colors duration-500 ease-in-out"
+      style={{
+        background: `linear-gradient(to bottom right, ${themeColors.first}, ${themeColors.second}, ${themeColors.third})`
+      }}
+    >
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
@@ -193,6 +271,58 @@ export default function CreateSurvey() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Krótko opisz cel ankiety..."
                 />
+              </div>
+
+              <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
+                <Label>Kolorystyka ankiety</Label>
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    
+                    {/* Picker 1: Główny */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Główny</Label>
+                      <div className="flex items-center gap-3">
+                          <div className="w-full">
+                              <JscolorPicker 
+                                  value={themeColors.first} 
+                                  onChange={(c) => setThemeColors(prev => ({...prev, first: c}))} 
+                              />
+                          </div>
+                          <div className="w-8 h-8 rounded border border-gray-300 shadow-sm flex-shrink-0" 
+                               style={{ backgroundColor: themeColors.first }} />
+                      </div>
+                    </div>
+
+                    {/* Picker 2: Akcent */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Dodatkowy</Label>
+                      <div className="flex items-center gap-3">
+                          <div className="w-full">
+                              <JscolorPicker 
+                                  value={themeColors.second} 
+                                  onChange={(c) => setThemeColors(prev => ({...prev, second: c}))} 
+                              />
+                          </div>
+                          <div className="w-8 h-8 rounded border border-gray-300 shadow-sm flex-shrink-0" 
+                               style={{ backgroundColor: themeColors.second }} />
+                      </div>
+                    </div>
+
+                    {/* Picker 3: Tło */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Tło</Label>
+                      <div className="flex items-center gap-3">
+                          <div className="w-full">
+                              <JscolorPicker 
+                                  value={themeColors.third} 
+                                  onChange={(c) => setThemeColors(prev => ({...prev, third: c}))} 
+                              />
+                          </div>
+                          <div className="w-8 h-8 rounded border border-gray-300 shadow-sm flex-shrink-0" 
+                               style={{ backgroundColor: themeColors.third }} />
+                      </div>
+                    </div>
+
+                </div>
               </div>
 
               <div className="space-y-6">

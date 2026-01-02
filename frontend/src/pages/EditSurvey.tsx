@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
 import { toast } from "sonner"
@@ -13,6 +13,64 @@ import { Textarea } from "@/components/ui/textarea"
 import { surveyService } from "@/services/survey-service"
 import type { SurveyDetail } from "@/types/survey"
 import type { SurveyIdParams } from "@/types/router"
+import '@eastdesire/jscolor'
+
+interface JscolorPickerProps {
+  value: string
+  onChange: (color: string) => void
+}
+
+const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const isInitialized = useRef(false) // Flaga zabezpieczająca
+
+  useEffect(() => {
+    const element = inputRef.current;
+
+    // Zabezpieczenie przed podwójną inicjalizacją
+    if (!element || isInitialized.current || (element as any).jscolor) {
+      return
+    }
+
+    const options = {
+      value: value,
+      format: 'hex',
+      previewSize: 40,
+      borderRadius: 4,
+      padding: 8,
+      width: 200,
+      closeButton: true,
+      closeText: 'OK',
+      onInput: function () {
+        // @ts-ignore
+        onChange(this.toHEXString())
+      }
+    }
+
+    isInitialized.current = true;
+    // @ts-ignore
+    new window.jscolor(element, options)
+  }, [])
+
+  useEffect(() => {
+    if (inputRef.current && (inputRef.current as any).jscolor && value) {
+      const picker = (inputRef.current as any).jscolor;
+      // Aktualizujemy tylko jeśli wartości są różne (ignorując wielkość liter)
+      if (picker.toHEXString().toLowerCase() !== value.toLowerCase()) {
+        picker.fromString(value)
+      }
+    }
+  }, [value])
+
+  return (
+    <div className="flex flex-col gap-1">
+      <input
+        ref={inputRef}
+        className="w-full h-9 border border-gray-300 rounded-md px-2 font-mono text-xs uppercase cursor-pointer text-center"
+      />
+    </div>
+  )
+}
 
 type ChoiceDraft = { id: string; text: string; originalId?: number }
 type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[]; originalId?: number }
@@ -37,6 +95,11 @@ export default function EditSurvey() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
+  const [themeColors, setThemeColors] = useState({
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#F3F4F6"
+  })
   const [questions, setQuestions] = useState<QuestionDraft[]>([])
   const [originalQuestionIds, setOriginalQuestionIds] = useState<number[]>([])
   const [originalChoiceIds, setOriginalChoiceIds] = useState<number[]>([])
@@ -59,6 +122,16 @@ export default function EditSurvey() {
         setTitle(data.title)
         setDescription(data.description || "")
         setIsActive(data.is_active)
+
+        if (data) {
+          // Ustawiamy kolory z bazy lub domyślne jeśli ich nie ma
+          setThemeColors({
+            first: (data as any).theme_first_color || "#f8fafc",
+            second: (data as any).theme_second_color || "#eef2ff",
+            third: (data as any).theme_third_color || "#F3F4F6",
+          })
+        }
+
         setQuestions(mapSurveyToDraft(data))
         setOriginalQuestionIds(data.questions.map((q) => q.id))
         setOriginalChoiceIds(data.questions.flatMap((q) => q.choices.map((c) => c.id)))
@@ -142,7 +215,10 @@ export default function EditSurvey() {
         title,
         description,
         is_active: isActive,
-      })
+        theme_first_color: themeColors.first,
+        theme_second_color: themeColors.second,
+        theme_third_color: themeColors.third,
+      } as any)
 
       const savedQuestionIds: number[] = []
       const savedChoiceIds: number[] = []
@@ -210,7 +286,12 @@ export default function EditSurvey() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 py-10 px-4">
+    <div
+      className="min-h-screen py-10 px-4 transition-colors duration-500 ease-in-out"
+      style={{
+        background: `linear-gradient(to bottom right, ${themeColors.first}, ${themeColors.second}, ${themeColors.third})`
+      }}
+    >
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
           <Button asChild variant="ghost" className="gap-2">
@@ -267,6 +348,48 @@ export default function EditSurvey() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Krótko opisz cel ankiety..."
                 />
+              </div>
+
+              <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
+                <Label>Kolor tła ankiety</Label>
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 1</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-full">
+                        <JscolorPicker
+                          value={themeColors.first}
+                          onChange={(c) => setThemeColors(prev => ({ ...prev, first: c }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 2</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-full">
+                        <JscolorPicker
+                          value={themeColors.second}
+                          onChange={(c) => setThemeColors(prev => ({ ...prev, second: c }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 3</Label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-full">
+                        <JscolorPicker
+                          value={themeColors.third}
+                          onChange={(c) => setThemeColors(prev => ({ ...prev, third: c }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-6">
