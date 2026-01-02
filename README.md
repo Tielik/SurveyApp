@@ -129,3 +129,7 @@ h: 123
 | PATCH | `/api/profile/me/`                | Usunięcie awatara lub zdjęcia tła                 | ✅ Tak           | `JSON`:<br>`{"avatar": null}`<br>lub<br>`{"background_image": null}` |
 | POST  | `/api/profile/change-password/`   | Bezpieczna zmiana hasła                           | ✅ Tak           | `JSON`:<br>`{"old_password": "...", "new_password": "..."}` |
 | DELETE| `/api/profile/me/`                | Usunięcie konta i wszystkich ankiet (CASCADE)     | ✅ Tak           | — |
+| POST  | `/api/register/`                  | Rejestracja użytkownika                           | ❌ Nie           | `JSON`:<br>`{"username": "...", "email": "...", "password": "..."}`|
+| GET   | `/api/verify-email/<uuid:token>/` | Weryfikacja email                                 | ❌ Nie           | - |
+| POST  | `/api/surveys/{survey_id}/rate/`  | pytania 1-5                                       | ✅ Tak           | `JSON`:<br>` {"answers":[{"question_id": "...", "value": "..."}]}` |
+
