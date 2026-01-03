@@ -9,7 +9,7 @@ export function AuthLayout({ children, className }: AuthLayoutProps) {
   return (
     <div
       className={cn(
-        "min-h-screen w-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100",
+        "min-h-screen w-full bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50",
         "flex items-center justify-center px-4 py-10",
         className,
       )}

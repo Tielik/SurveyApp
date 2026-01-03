@@ -41,12 +41,12 @@ interface ColorInput extends HTMLInputElement {
   jscolor?: JSColorInstance
 }
 
-interface JscolorPickerProps {
+interface JSColorPickerProps {
   value: string
   onChange: (color: string) => void
 }
 
-const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
+const JSColorPicker = ({ value, onChange }: JSColorPickerProps) => {
   const inputRef = useRef<ColorInput>(null)
   const isInitialized = useRef(false)
 
@@ -229,7 +229,7 @@ export default function CreateSurveyView({
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
                     <div className="w-full">
-                      <JscolorPicker
+                      <JSColorPicker
                         value={themeColors.first}
                         onChange={(c) => setThemeColors(prev => ({ ...prev, first: c }))}
                       />
@@ -239,7 +239,7 @@ export default function CreateSurveyView({
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 2 (Środek)</Label>
                     <div className="w-full">
-                      <JscolorPicker
+                      <JSColorPicker
                         value={themeColors.second}
                         onChange={(c) => setThemeColors(prev => ({ ...prev, second: c }))}
                       />
@@ -249,7 +249,7 @@ export default function CreateSurveyView({
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 3 (Dół-Prawo)</Label>
                     <div className="w-full">
-                      <JscolorPicker
+                      <JSColorPicker
                         value={themeColors.third}
                         onChange={(c) => setThemeColors(prev => ({ ...prev, third: c }))}
                       />

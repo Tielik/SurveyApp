@@ -17,7 +17,7 @@ export default function DashboardView({
   onCopyVoteLink,
 }: Props) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-100 p-6 md:p-10 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 p-6 md:p-10 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center border border-white/20">
           <div>
