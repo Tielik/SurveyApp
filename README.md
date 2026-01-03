@@ -124,8 +124,8 @@ h: 123
 
 | Metoda | Endpoint                          | Opis                                              | Wymaga logowania | Parametry (Body) |
 |------:|-----------------------------------|---------------------------------------------------|:----------------:|------------------|
-| GET   | `/api/profile/me/`                | Pobranie danych profilu (username, zdjęcia)       | ✅ Tak           | — |
-| PATCH | `/api/profile/me/`                | Aktualizacja profilu                              | ✅ Tak           | `form-data`:<br>• `avatar` (file)<br>• `background_image` (file)<br>• `username` (text) |
+| GET   | `/api/profile/me/`                | Pobranie danych profilu(username, zdjęcia, kolory)| ✅ Tak           | — |
+| PATCH | `/api/profile/me/`                | Aktualizacja profilu                              | ✅ Tak           | `form-data`:<br>• `avatar` (file)<br>• `background_image` (file)<br>• `username` (text)<br>• `color_1` (HEX)<br>• `color_2` (HEX)<br>• `color_3` (HEX) |
 | PATCH | `/api/profile/me/`                | Usunięcie awatara lub zdjęcia tła                 | ✅ Tak           | `JSON`:<br>`{"avatar": null}`<br>lub<br>`{"background_image": null}` |
 | POST  | `/api/profile/change-password/`   | Bezpieczna zmiana hasła                           | ✅ Tak           | `JSON`:<br>`{"old_password": "...", "new_password": "..."}` |
 | DELETE| `/api/profile/me/`                | Usunięcie konta i wszystkich ankiet (CASCADE)     | ✅ Tak           | — |

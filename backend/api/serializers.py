@@ -77,10 +77,13 @@ class UserSerializer(serializers.ModelSerializer):
     # Dodajemy pola z profilu
     avatar = serializers.ImageField(source='profile.avatar', required=False, allow_null=True)
     background_image = serializers.ImageField(source='profile.background_image', required=False, allow_null=True)
+    color_1 = serializers.CharField(source='profile.color_1', required=False)
+    color_2 = serializers.CharField(source='profile.color_2', required=False)
+    color_3 = serializers.CharField(source='profile.color_3', required=False)
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'avatar', 'background_image']
+        fields = ['username', 'password', 'avatar', 'background_image', 'color_1', 'color_2','color_3']
         # ukrywanie by api nigdy nie zwracało przy odczycie
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -103,6 +106,12 @@ class UserSerializer(serializers.ModelSerializer):
             profile.avatar = profile_data['avatar']
         if 'background_image' in profile_data:
             profile.background_image = profile_data['background_image']
+        if 'color_1' in profile_data:
+            profile.color_1 = profile_data['color_1']
+        if 'color_2' in profile_data:
+            profile.color_2 = profile_data['color_2']
+        if 'color_3' in profile_data:
+            profile.color_3 = profile_data['color_3']
         profile.save()
 
         return instance

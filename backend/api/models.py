@@ -49,13 +49,17 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     background_image = models.ImageField(upload_to='backgrounds/', null=True, blank=True)
+    color_1 = models.CharField(max_length=7, default='#f8fafc')
+    color_2 = models.CharField(max_length=7, default='#eef2ff')
+    color_3 = models.CharField(max_length=7, default='#ecfeff')
 
     def __str__(self):
         # Sprawdzamy, czy pliki istnieją, aby uniknąć błędów, jeśli pola są puste
         avatar_path = self.avatar.url if self.avatar else "Brak awatara"
         bg_path = self.background_image.url if self.background_image else "Brak tła"
 
-        return f"Profil: {self.user.username} | Avatar: {avatar_path} | BG: {bg_path}"
+        return f"Profil: {self.user.username} | Avatar: {avatar_path} | BG: {bg_path} | Color_1: {self.color_1} | Color_2: {self.color_2} | Color_3: {self.color_3}"
+
 
 
 @receiver(post_save, sender=User)
