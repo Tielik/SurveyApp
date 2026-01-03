@@ -67,9 +67,9 @@ export const useEditSurveyAction = () => {
            };
 
            setThemeColors({
-             first: dataWithColors.theme_first_color || "#3B82F6",
-             second: dataWithColors.theme_second_color || "#10B981",
-             third: dataWithColors.theme_third_color || "#F3F4F6",
+             first: dataWithColors.theme_first_color || "#f8fafc",
+             second: dataWithColors.theme_second_color || "#eef2ff",
+             third: dataWithColors.theme_third_color || "#f3f4f6",
            })
         }
 

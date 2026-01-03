@@ -25,9 +25,9 @@ export const useCreateSurveyAction = () => {
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
   const [themeColors, setThemeColors] = useState<ThemeColors>({
-    first: "#3B82F6",
-    second: "#10B981",
-    third: "#F3F4F6"
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#f3f4f6"
   })
   const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
   const [submitting, setSubmitting] = useState(false)

@@ -13,44 +13,84 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import type { QuestionDraft, ThemeColors } from "./EditSurveyAction"
 
+interface JSColorInstance {
+  toHEXString: () => string
+  fromString: (hex: string) => void
+}
+
+interface JSColorOptions {
+  value?: string
+  format?: 'hex' | 'rgb' | 'rgba'
+  previewSize?: number
+  borderRadius?: number
+  padding?: number
+  width?: number
+  closeButton?: boolean
+  closeText?: string
+  onInput?: (this: JSColorInstance) => void
+}
+
+declare global {
+  interface Window {
+    jscolor: new (target: HTMLElement, options: JSColorOptions) => JSColorInstance
+  }
+}
+
+interface ColorInput extends HTMLInputElement {
+  jscolor?: JSColorInstance
+}
+
 interface JscolorPickerProps {
   value: string
   onChange: (color: string) => void
 }
 
 const JscolorPicker = ({ value, onChange }: JscolorPickerProps) => {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<ColorInput>(null)
   const isInitialized = useRef(false)
 
+  const latestOnChange = useRef(onChange)
+
+  const initialValue = useRef(value)
+
   useEffect(() => {
-    const element = inputRef.current;
-    if (!element || isInitialized.current || (element as any).jscolor) {
+    latestOnChange.current = onChange
+  }, [onChange])
+
+  useEffect(() => {
+    const element = inputRef.current
+
+    if (!element || isInitialized.current || element.jscolor) {
       return
     }
 
-    const options = {
-      value: value,
-      format: 'hex',
+    const options: JSColorOptions = {
+      value: initialValue.current,
+      format: 'hex' as const,
       previewSize: 40,
       borderRadius: 4,
       padding: 8,
       width: 200,
       closeButton: true,
       closeText: 'OK',
-      onInput: function () {
-        // @ts-expect-error
-        onChange(this.toHEXString())
+      onInput: function (this: JSColorInstance) {
+        if (latestOnChange.current) {
+          latestOnChange.current(this.toHEXString())
+        }
       }
     }
 
-    isInitialized.current = true;
-    // @ts-expect-error
-    new window.jscolor(element, options)
+    isInitialized.current = true
+
+    if (window.jscolor) {
+      new window.jscolor(element, options)
+    }
   }, [])
 
   useEffect(() => {
-    if (inputRef.current && (inputRef.current as any).jscolor && value) {
-      const picker = (inputRef.current as any).jscolor;
+    const element = inputRef.current
+    if (element && element.jscolor && value) {
+      const picker = element.jscolor
       if (picker.toHEXString().toLowerCase() !== value.toLowerCase()) {
         picker.fromString(value)
       }
@@ -119,7 +159,7 @@ export default function EditSurveyView({
   }
 
   return (
-    <div 
+    <div
       className="min-h-screen px-4 py-10 transition-colors duration-500 ease-in-out"
       style={{
         background: `linear-gradient(to bottom right, ${themeColors.first}, ${themeColors.second}, ${themeColors.third})`
@@ -186,7 +226,7 @@ export default function EditSurveyView({
               <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
                 <Label>Kolorystyka ankiety</Label>
                 <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  
+
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
                     <div className="w-full">
