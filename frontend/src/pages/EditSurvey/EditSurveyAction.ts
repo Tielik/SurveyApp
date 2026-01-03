@@ -10,14 +10,23 @@ import type { SurveyDetail, CreateSurveyPayload } from "@/types/survey"
 import type { SurveyIdParams } from "@/types/router"
 
 export type ChoiceDraft = { id: string; text: string; originalId?: number }
-export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[]; originalId?: number }
+export type QuestionDraft = { 
+  id: string; 
+  text: string; 
+  choices: ChoiceDraft[]; 
+  originalId?: number; 
+  type: 'text' | 'rating' 
+}
 export type ThemeColors = { first: string; second: string; third: string }
 
+// ZMIANA: Usunięto logikę wykrywania typu. 
+// Teraz każde pytanie z bazy jest traktowane jako edytowalne pytanie tekstowe.
 const mapSurveyToDraft = (survey: SurveyDetail): QuestionDraft[] =>
   survey.questions.map((q) => ({
     id: createDraftId(),
     originalId: q.id,
     text: q.question_text,
+    type: 'text', // ZAWSZE tekst po załadowaniu
     choices: q.choices.map((c) => ({
       id: createDraftId(),
       originalId: c.id,
@@ -101,7 +110,27 @@ export const useEditSurveyAction = () => {
   const addQuestion = () => {
     setQuestions((prev) => [
       ...prev,
-      { id: createDraftId(), text: "", choices: [createEmptyChoice(), createEmptyChoice()] },
+      { 
+        id: createDraftId(), 
+        type: 'text', 
+        text: "", 
+        choices: [createEmptyChoice(), createEmptyChoice()] 
+      },
+    ])
+  }
+
+  const addQuestionRating = () => {
+    setQuestions((prev) => [
+      ...prev,
+      {
+        id: createDraftId(),
+        type: 'rating',
+        text: "",
+        choices: ["1", "2", "3", "4", "5"].map((val) => ({
+          id: createDraftId(),
+          text: val,
+        })),
+      },
     ])
   }
 
@@ -230,6 +259,7 @@ export const useEditSurveyAction = () => {
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,
+    addQuestionRating,
     removeQuestion,
     addChoice,
     removeChoice,
