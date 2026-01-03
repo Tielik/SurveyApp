@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react"
 import type { FormEvent, Dispatch, SetStateAction } from "react"
 import { Link } from "react-router-dom"
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
