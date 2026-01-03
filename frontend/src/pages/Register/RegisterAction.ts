@@ -9,11 +9,11 @@ export const useRegisterAction = () => {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleRegister = async (values: Credentials) => {
+  const handleRegister = async (values: Credentials, recaptchaToken: string) => {
     try {
       setLoading(true)
       setError(null)
-      await authService.register(values)
+      await authService.register(values, recaptchaToken)
       navigate("/")
     } catch (err) {
       console.error("Registration failed", err)

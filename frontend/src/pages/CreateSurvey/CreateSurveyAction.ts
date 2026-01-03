@@ -32,6 +32,8 @@ export const useCreateSurveyAction = () => {
   const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [recaptchaToken, setRecaptchaToken] = useState("")
+  const [recaptchaError, setRecaptchaError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!hasAuthToken()) {
@@ -87,6 +89,10 @@ export const useCreateSurveyAction = () => {
       toast.error(validationError)
       return
     }
+    if (!recaptchaToken) {
+      setRecaptchaError("Potwierdz reCAPTCHA.")
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -103,6 +109,7 @@ export const useCreateSurveyAction = () => {
         theme_first_color: themeColors.first,
         theme_second_color: themeColors.second,
         theme_third_color: themeColors.third,
+        recaptcha_token: recaptchaToken,
       } as ExtendedCreatePayload)
 
       for (const question of questions) {
@@ -144,10 +151,14 @@ export const useCreateSurveyAction = () => {
     questions,
     submitting,
     error,
+    recaptchaToken,
+    recaptchaError,
     setTitle,
     setDescription,
     setIsActive,
     setThemeColors,
+    setRecaptchaToken,
+    setRecaptchaError,
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,

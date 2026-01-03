@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +27,8 @@ SECRET_KEY = 'django-insecure-sg+wt7*ke326t%8$@aca3j08u=6+jk22c=f(nio6!5)gv-7(7o
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "6LcGxj0sAAAAAIeStlUgGrYu9zu7VmRkCw5kORXZ")
 
 
 # Application definition
@@ -136,3 +139,14 @@ REST_FRAMEWORK = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# EMAIL CONFIGURATION — wysyłka prawdziwych maili
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"        # lub inny SMTP
+EMAIL_PORT = 587                     # TLS
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "surveyapp84@gmail.com"      # nadawca 
+EMAIL_HOST_PASSWORD = "efci qeee iaib cofi" # hasło aplikacyjne 
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
