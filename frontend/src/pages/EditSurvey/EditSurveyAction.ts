@@ -6,11 +6,12 @@ import { toast } from "sonner"
 import { hasAuthToken } from "@/helpers/auth"
 import { createDraftId, validateSurveyDraft } from "@/helpers/survey-draft"
 import { surveyService } from "@/services/survey-service"
-import type { SurveyDetail } from "@/types/survey"
+import type { SurveyDetail, CreateSurveyPayload } from "@/types/survey"
 import type { SurveyIdParams } from "@/types/router"
 
 export type ChoiceDraft = { id: string; text: string; originalId?: number }
 export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[]; originalId?: number }
+export type ThemeColors = { first: string; second: string; third: string }
 
 const mapSurveyToDraft = (survey: SurveyDetail): QuestionDraft[] =>
   survey.questions.map((q) => ({
@@ -32,6 +33,11 @@ export const useEditSurveyAction = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
+  const [themeColors, setThemeColors] = useState<ThemeColors>({
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#F3F4F6"
+  })
   const [questions, setQuestions] = useState<QuestionDraft[]>([])
   const [originalQuestionIds, setOriginalQuestionIds] = useState<number[]>([])
   const [originalChoiceIds, setOriginalChoiceIds] = useState<number[]>([])
@@ -52,12 +58,27 @@ export const useEditSurveyAction = () => {
         setTitle(data.title)
         setDescription(data.description || "")
         setIsActive(data.is_active)
+        
+        if (data) {
+           const dataWithColors = data as SurveyDetail & { 
+              theme_first_color?: string; 
+              theme_second_color?: string; 
+              theme_third_color?: string; 
+           };
+
+           setThemeColors({
+             first: dataWithColors.theme_first_color || "#f8fafc",
+             second: dataWithColors.theme_second_color || "#eef2ff",
+             third: dataWithColors.theme_third_color || "#f3f4f6",
+           })
+        }
+
         setQuestions(mapSurveyToDraft(data))
         setOriginalQuestionIds(data.questions.map((q) => q.id))
         setOriginalChoiceIds(data.questions.flatMap((q) => q.choices.map((c) => c.id)))
       })
       .catch(() => {
-        toast.error("Nie udalo sie pobrac ankiety.")
+        toast.error("Nie udało się pobrać ankiety.")
         navigate("/dashboard")
       })
       .finally(() => setLoading(false))
@@ -121,11 +142,20 @@ export const useEditSurveyAction = () => {
     setSubmitting(true)
 
     try {
+      type ExtendedUpdatePayload = CreateSurveyPayload & {
+        theme_first_color: string;
+        theme_second_color: string;
+        theme_third_color: string;
+      };
+
       await surveyService.updateSurvey(Number(id), {
         title,
         description,
         is_active: isActive,
-      })
+        theme_first_color: themeColors.first,
+        theme_second_color: themeColors.second,
+        theme_third_color: themeColors.third,
+      } as ExtendedUpdatePayload)
 
       const savedQuestionIds: number[] = []
       const savedChoiceIds: number[] = []
@@ -177,8 +207,8 @@ export const useEditSurveyAction = () => {
       navigate("/dashboard")
     } catch (err) {
       console.error("Failed to update survey", err)
-      setError("Nie udalo sie zapisac ankiety. Sprobuj ponownie.")
-      toast.error("Nie udalo sie zapisac ankiety.")
+      setError("Nie udało się zapisać ankiety. Spróbuj ponownie.")
+      toast.error("Nie udało się zapisać ankiety.")
     } finally {
       setSubmitting(false)
     }
@@ -188,6 +218,7 @@ export const useEditSurveyAction = () => {
     title,
     description,
     isActive,
+    themeColors,
     questions,
     loading,
     submitting,
@@ -195,6 +226,7 @@ export const useEditSurveyAction = () => {
     setTitle,
     setDescription,
     setIsActive,
+    setThemeColors,
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,

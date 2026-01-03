@@ -6,10 +6,11 @@ import { toast } from "sonner"
 import { hasAuthToken } from "@/helpers/auth"
 import { createDraftId, validateSurveyDraft } from "@/helpers/survey-draft"
 import { surveyService } from "@/services/survey-service"
-import type { CreateChoicePayload } from "@/types/survey"
+import type { CreateChoicePayload, CreateSurveyPayload } from "@/types/survey"
 
 export type ChoiceDraft = { id: string; text: string }
 export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[] }
+export type ThemeColors = { first: string; second: string; third: string }
 
 const createEmptyChoice = (): ChoiceDraft => ({ id: createDraftId(), text: "" })
 const createEmptyQuestion = (): QuestionDraft => ({
@@ -23,6 +24,11 @@ export const useCreateSurveyAction = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [isActive, setIsActive] = useState(false)
+  const [themeColors, setThemeColors] = useState<ThemeColors>({
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#f3f4f6"
+  })
   const [questions, setQuestions] = useState<QuestionDraft[]>([createEmptyQuestion()])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -90,12 +96,21 @@ export const useCreateSurveyAction = () => {
 
     setSubmitting(true)
     try {
-      const survey = await surveyService.createSurvey({
-        title,
-        description,
+      type ExtendedCreatePayload = CreateSurveyPayload & {
+        theme_first_color: string;
+        theme_second_color: string;
+        theme_third_color: string;
+      };
+
+      const survey = await surveyService.createSurvey({ 
+        title, 
+        description, 
         is_active: isActive,
+        theme_first_color: themeColors.first,
+        theme_second_color: themeColors.second,
+        theme_third_color: themeColors.third,
         recaptcha_token: recaptchaToken,
-      })
+      } as ExtendedCreatePayload)
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({
@@ -116,13 +131,13 @@ export const useCreateSurveyAction = () => {
       }
 
       toast.success("Ankieta utworzona", {
-        description: `Kod dostŽtpu: ${survey.access_code}`,
+        description: `Kod dostępu: ${survey.access_code}`,
       })
       navigate("/dashboard")
     } catch (err) {
       console.error("Failed to create survey", err)
-      setError("Nie udalo sie utworzyc ankiety. Sprobuj ponownie.")
-      toast.error("Nie udalo sie utworzyc ankiety.")
+      setError("Nie udało się utworzyć ankiety. Spróbuj ponownie.")
+      toast.error("Nie udało się utworzyć ankiety.")
     } finally {
       setSubmitting(false)
     }
@@ -132,6 +147,7 @@ export const useCreateSurveyAction = () => {
     title,
     description,
     isActive,
+    themeColors,
     questions,
     submitting,
     error,
@@ -140,6 +156,7 @@ export const useCreateSurveyAction = () => {
     setTitle,
     setDescription,
     setIsActive,
+    setThemeColors,
     setRecaptchaToken,
     setRecaptchaError,
     handleQuestionChange,
