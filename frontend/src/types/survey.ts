@@ -22,6 +22,7 @@ export type CreateSurveyPayload = {
   title: string
   description?: string
   is_active?: boolean
+  recaptcha_token?: string
 }
 
 export type CreateQuestionPayload = {

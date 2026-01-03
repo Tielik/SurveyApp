@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { RecaptchaWidget } from "@/components/recaptcha"
 import type { QuestionDraft } from "./CreateSurveyAction"
 
 type Props = {
@@ -18,9 +19,13 @@ type Props = {
   questions: QuestionDraft[]
   submitting: boolean
   error: string | null
+  recaptchaToken: string
+  recaptchaError: string | null
   setTitle: (value: string) => void
   setDescription: (value: string) => void
   setIsActive: (value: boolean) => void
+  setRecaptchaToken: (value: string) => void
+  setRecaptchaError: (value: string | null) => void
   handleQuestionChange: (id: string, text: string) => void
   handleChoiceChange: (questionId: string, choiceId: string, text: string) => void
   addQuestion: () => void
@@ -37,9 +42,13 @@ export default function CreateSurveyView({
   questions,
   submitting,
   error,
+  recaptchaToken,
+  recaptchaError,
   setTitle,
   setDescription,
   setIsActive,
+  setRecaptchaToken,
+  setRecaptchaError,
   handleQuestionChange,
   handleChoiceChange,
   addQuestion,
@@ -187,8 +196,20 @@ export default function CreateSurveyView({
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <RecaptchaWidget
+                  onVerify={(token) => {
+                    setRecaptchaToken(token)
+                    if (token) setRecaptchaError(null)
+                  }}
+                  onExpired={() => setRecaptchaToken("")}
+                  onError={() => setRecaptchaError("Blad reCAPTCHA. Sprobuj ponownie.")}
+                />
+                {recaptchaError && <p className="text-sm text-red-500">{recaptchaError}</p>}
+              </div>
+
               <div className="flex flex-wrap items-center gap-3">
-                <Button type="submit" disabled={submitting}>
+                <Button type="submit" disabled={submitting || !recaptchaToken}>
                   {submitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

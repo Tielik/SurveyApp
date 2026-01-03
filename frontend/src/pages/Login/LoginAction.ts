@@ -9,11 +9,11 @@ export const useLoginAction = () => {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async (values: Credentials) => {
+  const handleLogin = async (values: Credentials, recaptchaToken: string) => {
     try {
       setLoading(true)
       setError(null)
-      const token = await authService.login(values)
+      const token = await authService.login(values, recaptchaToken)
       localStorage.setItem("token", token)
       navigate("/dashboard")
     } catch (err) {

@@ -6,7 +6,7 @@ import type { Credentials } from "@/types/auth"
 type Props = {
   error: string | null
   loading: boolean
-  onSubmit: (values: Credentials) => Promise<void>
+  onSubmit: (values: Credentials, recaptchaToken: string) => Promise<void>
 }
 
 export default function RegisterView({ error, loading, onSubmit }: Props) {
