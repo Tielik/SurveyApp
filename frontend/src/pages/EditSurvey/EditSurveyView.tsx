@@ -54,7 +54,6 @@ export default function EditSurveyView({
   handleChoiceChange,
   addQuestion,
   addQuestionRating,
-  changeQuestionType,
   removeQuestion,
   addChoice,
   removeChoice,

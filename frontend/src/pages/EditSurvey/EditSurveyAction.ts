@@ -71,9 +71,6 @@ export const useEditSurveyAction = () => {
         setTitle(data.title)
         setDescription(data.description || "")
         setIsActive(data.is_active)
-        
-        if (data) {
-        }
 
         setQuestions(mapSurveyToDraft(data))
         setOriginalQuestionIds(data.questions.map((q) => q.id))
