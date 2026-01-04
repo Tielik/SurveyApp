@@ -218,17 +218,6 @@ export default function EditSurveyView({
                                 <div className="p-4 bg-slate-50/50 rounded-lg border border-slate-100 flex justify-center">
                                   <Rating value={null} disabled className="bg-white p-2 rounded-xl shadow-sm" />
                                 </div>
-                                <div className="flex justify-end pt-2">
-                                    <Button 
-                                        type="button" 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="text-xs text-muted-foreground hover:text-red-600"
-                                        onClick={() => changeQuestionType(question.id, 'text')}
-                                    >
-                                        Przywróć edycję odpowiedzi
-                                    </Button>
-                                </div>
                             </div>
                           ) : (
                             <>
