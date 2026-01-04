@@ -3,7 +3,7 @@ import axios from "axios"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 
-type Choice = { id: number; choice_text: string; votes: number }
+export type Choice = { id: number; choice_text: string; votes: number }
 type Question = { id: number; question_text: string; choices: Choice[] }
 export type Survey = { id: number; title: string; description: string; questions: Question[] }
 

@@ -6,16 +6,22 @@ import { toast } from "sonner"
 import { hasAuthToken } from "@/helpers/auth"
 import { createDraftId, validateSurveyDraft } from "@/helpers/survey-draft"
 import { surveyService } from "@/services/survey-service"
-import type { CreateChoicePayload, CreateSurveyPayload } from "@/types/survey"
+import type { CreateChoicePayload } from "@/types/survey"
 
 export type ChoiceDraft = { id: string; text: string }
-export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[] }
+export type QuestionDraft = { 
+  id: string; 
+  text: string; 
+  choices: ChoiceDraft[];
+  type: 'text' | 'rating'; 
+}
 export type ThemeColors = { first: string; second: string; third: string }
 
 const createEmptyChoice = (): ChoiceDraft => ({ id: createDraftId(), text: "" })
 const createEmptyQuestion = (): QuestionDraft => ({
   id: createDraftId(),
   text: "",
+  type: 'text',
   choices: [createEmptyChoice(), createEmptyChoice()],
 })
 
@@ -47,15 +53,47 @@ export const useCreateSurveyAction = () => {
 
   const handleChoiceChange = (questionId: string, choiceId: string, text: string) => {
     setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === questionId
-          ? { ...q, choices: q.choices.map((c) => (c.id === choiceId ? { ...c, text } : c)) }
-          : q,
-      ),
+      prev.map((q) => {
+        if (q.id !== questionId) return q
+
+        const updatedChoices = q.choices.map((c) => (c.id === choiceId ? { ...c, text } : c))
+
+        const values = updatedChoices.map(c => c.text.trim()).sort()
+        const target = ["1", "2", "3", "4", "5"]
+        const isRatingSet = JSON.stringify(values) === JSON.stringify(target)
+
+        if (isRatingSet) {
+             return { ...q, choices: updatedChoices, type: 'rating' }
+        }
+
+        return { ...q, choices: updatedChoices }
+      }),
     )
   }
 
   const addQuestion = () => setQuestions((prev) => [...prev, createEmptyQuestion()])
+
+  const addQuestionRating = () => {
+    setQuestions((prev) => [
+      ...prev,
+      {
+        id: createDraftId(),
+        type: 'rating',
+        text: "",
+        choices: ["1", "2", "3", "4", "5"].map((val) => ({
+          id: createDraftId(),
+          text: val,
+        })),
+      },
+    ])
+  }
+
+  const changeQuestionType = (questionId: string, newType: 'text' | 'rating') => {
+    setQuestions((prev) => prev.map((q) => {
+        if (q.id !== questionId) return q;
+        return { ...q, type: newType };
+    }))
+  }
 
   const removeQuestion = (id: string) => {
     setQuestions((prev) => (prev.length === 1 ? prev : prev.filter((q) => q.id !== id)))
@@ -96,21 +134,12 @@ export const useCreateSurveyAction = () => {
 
     setSubmitting(true)
     try {
-      type ExtendedCreatePayload = CreateSurveyPayload & {
-        theme_first_color: string;
-        theme_second_color: string;
-        theme_third_color: string;
-      };
-
       const survey = await surveyService.createSurvey({ 
         title, 
         description, 
         is_active: isActive,
-        theme_first_color: themeColors.first,
-        theme_second_color: themeColors.second,
-        theme_third_color: themeColors.third,
         recaptcha_token: recaptchaToken,
-      } as ExtendedCreatePayload)
+      })
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({
@@ -162,6 +191,8 @@ export const useCreateSurveyAction = () => {
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,
+    addQuestionRating,
+    changeQuestionType,
     removeQuestion,
     addChoice,
     removeChoice,

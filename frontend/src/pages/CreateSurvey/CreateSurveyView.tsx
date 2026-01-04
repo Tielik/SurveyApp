@@ -2,6 +2,7 @@ import type { FormEvent, Dispatch, SetStateAction } from "react"
 import { Link } from "react-router-dom"
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
 
+import { Rating } from "@/components/Rating"
 import { JSColorPicker } from "@/components/JSColorPicker"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -12,7 +13,6 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { RecaptchaWidget } from "@/components/recaptcha"
 import type { QuestionDraft, ThemeColors } from "./CreateSurveyAction"
-
 
 type Props = {
   title: string
@@ -33,6 +33,8 @@ type Props = {
   handleQuestionChange: (id: string, text: string) => void
   handleChoiceChange: (questionId: string, choiceId: string, text: string) => void
   addQuestion: () => void
+  addQuestionRating: () => void
+  changeQuestionType: (id: string, newType: 'text' | 'rating') => void
   removeQuestion: (id: string) => void
   addChoice: (questionId: string) => void
   removeChoice: (questionId: string, choiceId: string) => void
@@ -58,6 +60,7 @@ export default function CreateSurveyView({
   handleQuestionChange,
   handleChoiceChange,
   addQuestion,
+  addQuestionRating,
   removeQuestion,
   addChoice,
   removeChoice,
@@ -131,7 +134,7 @@ export default function CreateSurveyView({
               <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
                 <Label>Kolorystyka ankiety</Label>
                 <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
-
+                  
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
                     <div className="w-full">
@@ -168,10 +171,16 @@ export default function CreateSurveyView({
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Pytania</h3>
-                  <Button type="button" variant="secondary" size="sm" onClick={addQuestion}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Dodaj pytanie
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={addQuestion}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Pytanie tekstowe
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={addQuestionRating}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Pytanie ze skalą
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-6">
@@ -183,7 +192,7 @@ export default function CreateSurveyView({
                             {index + 1}.
                           </div>
                           <div className="flex-1 space-y-2">
-                            <Label>Pytanie</Label>
+                            <Label>Pytanie {question.type === 'rating' && "(Skala 1-5)"}</Label>
                             <Input
                               value={question.text}
                               onChange={(e) => handleQuestionChange(question.id, e.target.value)}
@@ -202,40 +211,53 @@ export default function CreateSurveyView({
                         </div>
 
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-muted-foreground">Odpowiedzi</span>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => addChoice(question.id)}
-                            >
-                              <Plus className="mr-2 h-4 w-4" />
-                              Dodaj odpowiedź
-                            </Button>
-                          </div>
-                          <div className="space-y-2">
-                            {question.choices.map((choice, choiceIndex) => (
-                              <div key={choice.id} className="flex items-center gap-2">
-                                <Input
-                                  value={choice.text}
-                                  onChange={(e) =>
-                                    handleChoiceChange(question.id, choice.id, e.target.value)
-                                  }
-                                  placeholder={`Odpowiedź ${choiceIndex + 1}`}
-                                />
+                          {question.type === 'rating' ? (
+                            <div className="pt-2 animate-in fade-in slide-in-from-top-1">
+                                <Label className="text-xs text-muted-foreground mb-2 block">
+                                  Podgląd skali (odpowiedzi stałe: 1-5)
+                                </Label>
+                                <div className="p-4 bg-slate-50/50 rounded-lg border border-slate-100 flex justify-center">
+                                  <Rating value={null} disabled className="bg-white p-2 rounded-xl shadow-sm" />
+                                </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-muted-foreground">Odpowiedzi</span>
                                 <Button
                                   type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  disabled={question.choices.length <= 2}
-                                  onClick={() => removeChoice(question.id, choice.id)}
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => addChoice(question.id)}
                                 >
-                                  <Trash className="h-4 w-4 text-muted-foreground" />
+                                  <Plus className="mr-2 h-4 w-4" />
+                                  Dodaj odpowiedź
                                 </Button>
                               </div>
-                            ))}
-                          </div>
+                              <div className="space-y-2">
+                                {question.choices.map((choice, choiceIndex) => (
+                                  <div key={choice.id} className="flex items-center gap-2 ps-5 pe-3">
+                                    <Input
+                                      value={choice.text}
+                                      onChange={(e) =>
+                                        handleChoiceChange(question.id, choice.id, e.target.value)
+                                      }
+                                      placeholder={`Odpowiedź ${choiceIndex + 1}`}
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      disabled={question.choices.length <= 2}
+                                      onClick={() => removeChoice(question.id, choice.id)}
+                                    >
+                                      <Trash className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -250,7 +272,7 @@ export default function CreateSurveyView({
                     if (token) setRecaptchaError(null)
                   }}
                   onExpired={() => setRecaptchaToken("")}
-                  onError={() => setRecaptchaError("Blad reCAPTCHA. Sprobuj ponownie.")}
+                  onError={() => setRecaptchaError("Błąd reCAPTCHA. Spróbuj ponownie.")}
                 />
                 {recaptchaError && <p className="text-sm text-red-500">{recaptchaError}</p>}
               </div>

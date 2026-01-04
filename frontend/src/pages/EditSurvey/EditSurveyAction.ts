@@ -10,20 +10,33 @@ import type { SurveyDetail, CreateSurveyPayload } from "@/types/survey"
 import type { SurveyIdParams } from "@/types/router"
 
 export type ChoiceDraft = { id: string; text: string; originalId?: number }
-export type QuestionDraft = { id: string; text: string; choices: ChoiceDraft[]; originalId?: number }
+export type QuestionDraft = { 
+  id: string; 
+  text: string; 
+  choices: ChoiceDraft[]; 
+  originalId?: number; 
+  type: 'text' | 'rating' 
+}
 export type ThemeColors = { first: string; second: string; third: string }
 
 const mapSurveyToDraft = (survey: SurveyDetail): QuestionDraft[] =>
-  survey.questions.map((q) => ({
-    id: createDraftId(),
-    originalId: q.id,
-    text: q.question_text,
-    choices: q.choices.map((c) => ({
+  survey.questions.map((q) => {
+    const choiceTexts = q.choices.map((c) => c.choice_text).sort()
+    const standardValues = ["1", "2", "3", "4", "5"]
+    const isRating = JSON.stringify(choiceTexts) === JSON.stringify(standardValues)
+
+    return {
       id: createDraftId(),
-      originalId: c.id,
-      text: c.choice_text,
-    })),
-  }))
+      originalId: q.id,
+      text: q.question_text,
+      type: isRating ? 'rating' : 'text',
+      choices: q.choices.map((c) => ({
+        id: createDraftId(),
+        originalId: c.id,
+        text: c.choice_text,
+      })),
+    }
+  })
 
 const createEmptyChoice = (): ChoiceDraft => ({ id: createDraftId(), text: "" })
 
@@ -58,20 +71,6 @@ export const useEditSurveyAction = () => {
         setTitle(data.title)
         setDescription(data.description || "")
         setIsActive(data.is_active)
-        
-        if (data) {
-           const dataWithColors = data as SurveyDetail & { 
-              theme_first_color?: string; 
-              theme_second_color?: string; 
-              theme_third_color?: string; 
-           };
-
-           setThemeColors({
-             first: dataWithColors.theme_first_color || "#f8fafc",
-             second: dataWithColors.theme_second_color || "#eef2ff",
-             third: dataWithColors.theme_third_color || "#f3f4f6",
-           })
-        }
 
         setQuestions(mapSurveyToDraft(data))
         setOriginalQuestionIds(data.questions.map((q) => q.id))
@@ -90,19 +89,56 @@ export const useEditSurveyAction = () => {
 
   const handleChoiceChange = (questionId: string, choiceId: string, text: string) => {
     setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === questionId
-          ? { ...q, choices: q.choices.map((c) => (c.id === choiceId ? { ...c, text } : c)) }
-          : q,
-      ),
+      prev.map((q) => {
+        if (q.id !== questionId) return q
+
+        const updatedChoices = q.choices.map((c) => (c.id === choiceId ? { ...c, text } : c))
+
+        const values = updatedChoices.map(c => c.text.trim()).sort()
+        const target = ["1", "2", "3", "4", "5"]
+        const isRatingSet = JSON.stringify(values) === JSON.stringify(target)
+
+        if (isRatingSet) {
+             return { ...q, choices: updatedChoices, type: 'rating' }
+        }
+
+        return { ...q, choices: updatedChoices }
+      }),
     )
   }
 
   const addQuestion = () => {
     setQuestions((prev) => [
       ...prev,
-      { id: createDraftId(), text: "", choices: [createEmptyChoice(), createEmptyChoice()] },
+      { 
+        id: createDraftId(), 
+        type: 'text', 
+        text: "", 
+        choices: [createEmptyChoice(), createEmptyChoice()] 
+      },
     ])
+  }
+
+  const addQuestionRating = () => {
+    setQuestions((prev) => [
+      ...prev,
+      {
+        id: createDraftId(),
+        type: 'rating',
+        text: "",
+        choices: ["1", "2", "3", "4", "5"].map((val) => ({
+          id: createDraftId(),
+          text: val,
+        })),
+      },
+    ])
+  }
+
+  const changeQuestionType = (questionId: string, newType: 'text' | 'rating') => {
+    setQuestions((prev) => prev.map((q) => {
+        if (q.id !== questionId) return q;
+        return { ...q, type: newType };
+    }))
   }
 
   const removeQuestion = (questionId: string) => {
@@ -117,13 +153,11 @@ export const useEditSurveyAction = () => {
     )
   }
 
-  const removeChoice = (questionId: string, choiceId: string) => {
+  const removeChoice = (questionId: string) => {
     setQuestions((prev) =>
-      prev.map((q) => {
-        if (q.id !== questionId) return q
-        if (q.choices.length <= 2) return q
-        return { ...q, choices: q.choices.filter((c) => c.id !== choiceId) }
-      }),
+      prev.map((q) =>
+        q.id === questionId ? { ...q, choices: [...q.choices, createEmptyChoice()] } : q,
+      ),
     )
   }
 
@@ -230,6 +264,8 @@ export const useEditSurveyAction = () => {
     handleQuestionChange,
     handleChoiceChange,
     addQuestion,
+    addQuestionRating,
+    changeQuestionType,
     removeQuestion,
     addChoice,
     removeChoice,
