@@ -19,20 +19,24 @@ export type QuestionDraft = {
 }
 export type ThemeColors = { first: string; second: string; third: string }
 
-// ZMIANA: Usunięto logikę wykrywania typu. 
-// Teraz każde pytanie z bazy jest traktowane jako edytowalne pytanie tekstowe.
 const mapSurveyToDraft = (survey: SurveyDetail): QuestionDraft[] =>
-  survey.questions.map((q) => ({
-    id: createDraftId(),
-    originalId: q.id,
-    text: q.question_text,
-    type: 'text', // ZAWSZE tekst po załadowaniu
-    choices: q.choices.map((c) => ({
+  survey.questions.map((q) => {
+    const choiceTexts = q.choices.map((c) => c.choice_text).sort()
+    const standardValues = ["1", "2", "3", "4", "5"]
+    const isRating = JSON.stringify(choiceTexts) === JSON.stringify(standardValues)
+
+    return {
       id: createDraftId(),
-      originalId: c.id,
-      text: c.choice_text,
-    })),
-  }))
+      originalId: q.id,
+      text: q.question_text,
+      type: isRating ? 'rating' : 'text',
+      choices: q.choices.map((c) => ({
+        id: createDraftId(),
+        originalId: c.id,
+        text: c.choice_text,
+      })),
+    }
+  })
 
 const createEmptyChoice = (): ChoiceDraft => ({ id: createDraftId(), text: "" })
 
@@ -69,17 +73,6 @@ export const useEditSurveyAction = () => {
         setIsActive(data.is_active)
         
         if (data) {
-           const dataWithColors = data as SurveyDetail & { 
-              theme_first_color?: string; 
-              theme_second_color?: string; 
-              theme_third_color?: string; 
-           };
-
-           setThemeColors({
-             first: dataWithColors.theme_first_color || "#f8fafc",
-             second: dataWithColors.theme_second_color || "#eef2ff",
-             third: dataWithColors.theme_third_color || "#f3f4f6",
-           })
         }
 
         setQuestions(mapSurveyToDraft(data))
@@ -99,11 +92,21 @@ export const useEditSurveyAction = () => {
 
   const handleChoiceChange = (questionId: string, choiceId: string, text: string) => {
     setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === questionId
-          ? { ...q, choices: q.choices.map((c) => (c.id === choiceId ? { ...c, text } : c)) }
-          : q,
-      ),
+      prev.map((q) => {
+        if (q.id !== questionId) return q
+
+        const updatedChoices = q.choices.map((c) => (c.id === choiceId ? { ...c, text } : c))
+
+        const values = updatedChoices.map(c => c.text.trim()).sort()
+        const target = ["1", "2", "3", "4", "5"]
+        const isRatingSet = JSON.stringify(values) === JSON.stringify(target)
+
+        if (isRatingSet) {
+             return { ...q, choices: updatedChoices, type: 'rating' }
+        }
+
+        return { ...q, choices: updatedChoices }
+      }),
     )
   }
 
@@ -134,6 +137,13 @@ export const useEditSurveyAction = () => {
     ])
   }
 
+  const changeQuestionType = (questionId: string, newType: 'text' | 'rating') => {
+    setQuestions((prev) => prev.map((q) => {
+        if (q.id !== questionId) return q;
+        return { ...q, type: newType };
+    }))
+  }
+
   const removeQuestion = (questionId: string) => {
     setQuestions((prev) => (prev.length === 1 ? prev : prev.filter((q) => q.id !== questionId)))
   }
@@ -146,13 +156,11 @@ export const useEditSurveyAction = () => {
     )
   }
 
-  const removeChoice = (questionId: string, choiceId: string) => {
+  const removeChoice = (questionId: string) => {
     setQuestions((prev) =>
-      prev.map((q) => {
-        if (q.id !== questionId) return q
-        if (q.choices.length <= 2) return q
-        return { ...q, choices: q.choices.filter((c) => c.id !== choiceId) }
-      }),
+      prev.map((q) =>
+        q.id === questionId ? { ...q, choices: [...q.choices, createEmptyChoice()] } : q,
+      ),
     )
   }
 
@@ -260,6 +268,7 @@ export const useEditSurveyAction = () => {
     handleChoiceChange,
     addQuestion,
     addQuestionRating,
+    changeQuestionType,
     removeQuestion,
     addChoice,
     removeChoice,

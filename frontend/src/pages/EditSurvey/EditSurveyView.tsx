@@ -1,9 +1,8 @@
 import type { FormEvent, Dispatch, SetStateAction } from "react"
-import { useState } from "react"
 import { Link } from "react-router-dom"
 import { ArrowLeft, Loader2, Plus, Save, Trash } from "lucide-react"
 
-import { Rating } from "@/components/Rating" // Upewnij się, że masz ten komponent
+import { Rating } from "@/components/Rating"
 import { JSColorPicker } from "@/components/JSColorPicker"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -31,6 +30,7 @@ type Props = {
   handleChoiceChange: (questionId: string, choiceId: string, text: string) => void
   addQuestion: () => void
   addQuestionRating: () => void
+  changeQuestionType: (id: string, newType: 'text' | 'rating') => void
   removeQuestion: (id: string) => void
   addChoice: (questionId: string) => void
   removeChoice: (questionId: string, choiceId: string) => void
@@ -54,6 +54,7 @@ export default function EditSurveyView({
   handleChoiceChange,
   addQuestion,
   addQuestionRating,
+  changeQuestionType,
   removeQuestion,
   addChoice,
   removeChoice,
@@ -174,7 +175,7 @@ export default function EditSurveyView({
                         <Plus className="mr-2 h-4 w-4" />
                         Pytanie tekstowe
                     </Button>
-                    <Button type="button" variant="secondary" size="sm" onClick={addQuestionRating}>
+                    <Button type="button" variant="outline" size="sm" onClick={addQuestionRating}>
                         <Plus className="mr-2 h-4 w-4" />
                         Pytanie ze skalą
                     </Button>
@@ -210,12 +211,23 @@ export default function EditSurveyView({
 
                         <div className="space-y-3">
                           {question.type === 'rating' ? (
-                            <div className="pt-2">
+                            <div className="pt-2 animate-in fade-in slide-in-from-top-1">
                                 <Label className="text-xs text-muted-foreground mb-2 block">
                                   Podgląd skali (odpowiedzi stałe: 1-5)
                                 </Label>
                                 <div className="p-4 bg-slate-50/50 rounded-lg border border-slate-100 flex justify-center">
                                   <Rating value={null} disabled className="bg-white p-2 rounded-xl shadow-sm" />
+                                </div>
+                                <div className="flex justify-end pt-2">
+                                    <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="text-xs text-muted-foreground hover:text-red-600"
+                                        onClick={() => changeQuestionType(question.id, 'text')}
+                                    >
+                                        Przywróć edycję odpowiedzi
+                                    </Button>
                                 </div>
                             </div>
                           ) : (
