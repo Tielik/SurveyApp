@@ -56,6 +56,8 @@ class Profile(models.Model):
     color_1 = models.CharField(max_length=7, default='#f8fafc')
     color_2 = models.CharField(max_length=7, default='#eef2ff')
     color_3 = models.CharField(max_length=7, default='#ecfeff')
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token = models.UUIDField(default=uuid.uuid4, null=True, blank=True)
 
     def __str__(self):
         # Sprawdzamy, czy pliki istnieją, aby uniknąć błędów, jeśli pola są puste

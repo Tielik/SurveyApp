@@ -86,13 +86,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'avatar', 'background_image', 'color_1', 'color_2','color_3']
+        fields = ['username','email', 'password', 'avatar', 'background_image', 'color_1', 'color_2','color_3']
         # ukrywanie by api nigdy nie zwracało przy odczycie
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        # dzięki temu przy tworzeniu nowego użytkownika hasło jest szyfrowane
-        user = User.objects.create_user(**validated_data)
+        # Tworzymy użytkownika z poprawnym hasłem i mailem.
+        # Wyciągamy tylko pola obsługiwane przez model User (username, email, password),
+        # resztę pól (avatar, kolory) obsłużymy w update() lub w logice profilu.
+        user_fields = {k: validated_data[k] for k in ['username', 'email', 'password']}
+        user = User.objects.create_user(**user_fields)
         return user
 
     def update(self, instance, validated_data):
@@ -102,6 +105,8 @@ class UserSerializer(serializers.ModelSerializer):
 
         # Aktualizacja User (np. username)
         instance.username = validated_data.get('username', instance.username)
+        email = validated_data.get('email', instance.email)
+        instance.email = email  # upewniamy się, że email zostanie zapisany
         instance.save()
 
         # Aktualizacja Profile
