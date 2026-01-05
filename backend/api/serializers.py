@@ -30,7 +30,8 @@ class SurveySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Survey
-        fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active','color_1', 'color_2','color_3']
+        fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active', 'color_1', 'color_2',
+                  'color_3']
         read_only_fields = ['access_code']
 
         def create(self, validated_data):
@@ -86,9 +87,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username','email', 'password', 'avatar', 'background_image', 'color_1', 'color_2','color_3']
+        fields = ['username', 'email', 'password', 'avatar', 'background_image', 'color_1', 'color_2', 'color_3']
         # ukrywanie by api nigdy nie zwracało przy odczycie
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True},
+                        'email': {'required': True}}
+
+    # Sprawdza czy konto z podanym mailem już istnieje
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "Konto z tym adresem email już istnieje."
+            )
+        return value
 
     def create(self, validated_data):
         # Tworzymy użytkownika z poprawnym hasłem i mailem.
