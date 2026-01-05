@@ -7,7 +7,8 @@ from django.contrib.auth.password_validation import validate_password
 # prototyp model ankiety tu jest przerabiana na JSON
 class ChoiceSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all(), write_only=True)
+    question = serializers.PrimaryKeyRelatedField(
+        queryset=Question.objects.all(), write_only=True)
 
     class Meta:
         model = Choice
@@ -18,7 +19,8 @@ class ChoiceSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     choices = ChoiceSerializer(many=True, read_only=True, source='choice_set')
-    survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all(), write_only=True)
+    survey = serializers.PrimaryKeyRelatedField(
+        queryset=Survey.objects.all(), write_only=True)
 
     class Meta:
         model = Question
@@ -26,11 +28,13 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 
 class SurveySerializer(serializers.ModelSerializer):
-    questions = QuestionSerializer(many=True, read_only=True, source='question_set')
+    questions = QuestionSerializer(
+        many=True, read_only=True, source='question_set')
 
     class Meta:
         model = Survey
-        fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active']
+        fields = ['id', 'title', 'description',
+                  'questions', 'access_code', 'is_active']
         read_only_fields = ['access_code']
 
         def create(self, validated_data):
@@ -42,7 +46,8 @@ class SurveySerializer(serializers.ModelSerializer):
             for question_data in questions_data:
                 choices_data = question_data.pop('choice_set')
                 # Tworzymy pytanie przypisane do ankiety
-                question = Question.objects.create(survey=survey, **question_data)
+                question = Question.objects.create(
+                    survey=survey, **question_data)
                 # 4. Pętla po opcjach
                 for choice_data in choices_data:
                     # Tworzymy opcję przypisaną do pytania
@@ -53,8 +58,10 @@ class SurveySerializer(serializers.ModelSerializer):
         def update(self, instance, validated_data):
             # Aktualizacja prostych pól Ankiety
             instance.title = validated_data.get('title', instance.title)
-            instance.description = validated_data.get('description', instance.description)
-            instance.is_active = validated_data.get('is_active', instance.is_active)
+            instance.description = validated_data.get(
+                'description', instance.description)
+            instance.is_active = validated_data.get(
+                'is_active', instance.is_active)
             instance.save()
             #  Obsługa pytań (Strategia: Usuń stare i stwórz nowe)
             # To najprostsza strategia dla prototypu. Przy PUT kasujemy stare pytania
@@ -66,7 +73,8 @@ class SurveySerializer(serializers.ModelSerializer):
                 # Tworzymy nowe (identycznie jak w create)
                 for question_data in questions_data:
                     choices_data = question_data.pop('choice_set')
-                    question = Question.objects.create(survey=instance, **question_data)
+                    question = Question.objects.create(
+                        survey=instance, **question_data)
                     for choice_data in choices_data:
                         Choice.objects.create(question=question, **choice_data)
             return instance
@@ -75,24 +83,42 @@ class SurveySerializer(serializers.ModelSerializer):
 # model użytkowników
 class UserSerializer(serializers.ModelSerializer):
     # Dodajemy pola z profilu
-    avatar = serializers.ImageField(source='profile.avatar', required=False, allow_null=True)
-    background_image = serializers.ImageField(source='profile.background_image', required=False, allow_null=True)
+    avatar = serializers.ImageField(
+        source='profile.avatar', required=False, allow_null=True)
+    background_image = serializers.ImageField(
+        source='profile.background_image', required=False, allow_null=True)
     color_1 = serializers.CharField(source='profile.color_1', required=False)
     color_2 = serializers.CharField(source='profile.color_2', required=False)
     color_3 = serializers.CharField(source='profile.color_3', required=False)
 
+    # Pola specjalne (flagi) do usuwania zdjęć - write_only oznacza, że nie są zwracane w JSON
+    delete_avatar = serializers.BooleanField(
+        write_only=True, required=False, default=False)
+    delete_background_image = serializers.BooleanField(
+        write_only=True, required=False, default=False)
+
     class Meta:
         model = User
-        fields = ['username', 'password', 'avatar', 'background_image', 'color_1', 'color_2','color_3']
+        fields = ['username', 'password', 'avatar', 'background_image', 'color_1',
+                  'color_2', 'color_3', 'delete_avatar', 'delete_background_image']
         # ukrywanie by api nigdy nie zwracało przy odczycie
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        # Usuwamy pola profilu z validated_data, bo create_user ich nie przyjmuje
+        validated_data.pop('profile', None)
+        validated_data.pop('delete_avatar', None)
+        validated_data.pop('delete_background_image', None)
+
         # dzięki temu przy tworzeniu nowego użytkownika hasło jest szyfrowane
         user = User.objects.create_user(**validated_data)
         return user
 
     def update(self, instance, validated_data):
+        # Wyciągamy flagi usuwania (domyślnie False)
+        delete_avatar = validated_data.get('delete_avatar', False)
+        delete_bg = validated_data.get('delete_background_image', False)
+
         # Obsługa pól profilu (avatar/background)
         profile_data = validated_data.pop('profile', {})
         profile = instance.profile
@@ -101,28 +127,45 @@ class UserSerializer(serializers.ModelSerializer):
         instance.username = validated_data.get('username', instance.username)
         instance.save()
 
-        # Aktualizacja Profile
-        if 'avatar' in profile_data:
-            profile.avatar = profile_data['avatar']
-        if 'background_image' in profile_data:
-            profile.background_image = profile_data['background_image']
-        if 'color_1' in profile_data:
-            profile.color_1 = profile_data['color_1']
-        if 'color_2' in profile_data:
-            profile.color_2 = profile_data['color_2']
-        if 'color_3' in profile_data:
-            profile.color_3 = profile_data['color_3']
-        profile.save()
+        # --- LOGIKA AVATARA ---
+        if delete_avatar:
+            profile.avatar.delete(save=False)
+            profile.avatar = None
+        else:
+            # Sprawdzamy czy przysłano nowy avatar używając .get()
+            new_avatar = profile_data.get('avatar')
+            if new_avatar:
+                profile.avatar = new_avatar
 
+        # --- LOGIKA TŁA ---
+        if delete_bg:
+            profile.background_image.delete(save=False)
+            profile.background_image = None
+        else:
+            new_bg = profile_data.get('background_image')
+            if new_bg:
+                profile.background_image = new_bg
+
+        # --- KOLORY ---
+        if 'color_1' in profile_data:
+            profile.color_1 = profile_data.get('color_1')
+        if 'color_2' in profile_data:
+            profile.color_2 = profile_data.get('color_2')
+        if 'color_3' in profile_data:
+            profile.color_3 = profile_data.get('color_3')
+
+        profile.save()
         return instance
 
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True, validators=[validate_password])
+    new_password = serializers.CharField(
+        required=True, validators=[validate_password])
     confirm_password = serializers.CharField(required=True)
 
     def validate(self, attrs):
         if attrs['new_password'] != attrs['confirm_password']:
-            raise serializers.ValidationError({"confirm_password": "Hasła nie są identyczne."})
+            raise serializers.ValidationError(
+                {"confirm_password": "Hasła nie są identyczne."})
         return attrs
