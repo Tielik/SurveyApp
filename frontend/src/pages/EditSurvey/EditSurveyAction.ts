@@ -190,7 +190,7 @@ export const useEditSurveyAction = () => {
         color_1: themeColors.first,
         color_2: themeColors.second,
         color_3: themeColors.third,
-      } as any)
+      } as Partial<SurveyDetail>)
 
       const savedQuestionIds: number[] = []
       const savedChoiceIds: number[] = []

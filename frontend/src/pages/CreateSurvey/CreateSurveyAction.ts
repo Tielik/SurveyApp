@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { hasAuthToken } from "@/helpers/auth"
 import { createDraftId, validateSurveyDraft } from "@/helpers/survey-draft"
 import { surveyService } from "@/services/survey-service"
-import type { CreateChoicePayload } from "@/types/survey"
+import type { CreateChoicePayload, CreateSurveyPayload } from "@/types/survey"
 
 export type ChoiceDraft = { id: string; text: string }
 export type QuestionDraft = { 
@@ -142,7 +142,7 @@ export const useCreateSurveyAction = () => {
         color_1: themeColors.first,
         color_2: themeColors.second,
         color_3: themeColors.third,
-      } as any)
+      } as CreateSurveyPayload)
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({
