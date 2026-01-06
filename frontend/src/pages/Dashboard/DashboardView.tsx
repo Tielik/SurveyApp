@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Link } from "react-router-dom"
 import { BarChart3, ExternalLink, Pencil, User as UserIcon, X, Upload, Image as ImageIcon, Trash2 } from "lucide-react"
 
@@ -26,21 +26,38 @@ export default function DashboardView({
 }: Props) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
 
-  const dynamicBackgroundStyle = user?.background_image
-    ? {
-      backgroundImage: `url(${user.background_image})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
+  const dynamicBackgroundStyle = useMemo(() => {
+    if (!user) {
+      return { background: '#f8fafc' }
     }
-    : {
-      // Jeśli brak obrazka, użyj gradientu z 3 kolorów użytkownika
-      background: `linear-gradient(135deg, ${user?.color_1 || '#f8fafc'}, ${user?.color_2 || '#9333ea'}, ${user?.color_3 || '#06b6d4'})`
+
+    if (user.background_image) {
+      return {
+        backgroundImage: `url(${user.background_image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }
     }
+
+    const c1 = user.color_1 || '#f8fafc'
+    const c2 = user.color_2 || '#eef2ff'
+    const c3 = user.color_3 || '#F3F4F6'
+
+    return {
+      background: `linear-gradient(135deg, ${c1}, ${c2}, ${c3})`,
+      minHeight: '100vh',
+      transition: 'background 0.5s ease-in-out'
+    }
+  }, [user])
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 p-6 md:p-10 font-sans"
-      style={dynamicBackgroundStyle}>
+    <div
+      className="min-h-screen p-6 md:p-10 font-sans"
+      style={dynamicBackgroundStyle}
+    >
       <div className="max-w-6xl mx-auto space-y-8">
         {/* --- HEADER --- */}
         <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-center border border-white/20">
@@ -277,7 +294,7 @@ function EditProfileModal({ user, onClose, onSubmit }: { user: User, onClose: ()
       }
     }
   }
-  // Funkcja usuwania (resetuje podgląd i ustawia flagę)
+
   const handleRemove = (type: 'avatar' | 'bg') => {
     if (type === 'avatar') {
       setAvatarFile(null)
@@ -306,7 +323,7 @@ function EditProfileModal({ user, onClose, onSubmit }: { user: User, onClose: ()
     }
 
     if (deleteBg) {
-      formData.append('delete_background_image', 'true') // FLAGA DLA SERIALIZERA
+      formData.append('delete_background_image', 'true')
     } else if (bgFile) {
       formData.append('background_image', bgFile)
     }
@@ -384,42 +401,42 @@ function EditProfileModal({ user, onClose, onSubmit }: { user: User, onClose: ()
           </div>
 
           {/* Sekcja Kolorów */}
-                        <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
-                <Label>Kolorystyka ankiety</Label>
-                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
-                    <div className="w-full">
-                      <JSColorPicker
-                        value={color1}
-                        onChange={(c) => setColor1(c)}
-                      />
-                    </div>
-                  </div>
+          <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
+            <Label>Kolorystyka ankiety</Label>
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Kolor 2 (Środek)</Label>
-                    <div className="w-full">
-                      <JSColorPicker
-                        value={color2}
-                        onChange={(c) => setColor2(c)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Kolor 3 (Dół-Prawo)</Label>
-                    <div className="w-full">
-                      <JSColorPicker
-                        value={color3}
-                        onChange={(c) => setColor3(c)}
-                      />
-                    </div>
-                  </div>
-
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
+                <div className="w-full">
+                  <JSColorPicker
+                    value={color1}
+                    onChange={(c) => setColor1(c)}
+                  />
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Kolor 2 (Środek)</Label>
+                <div className="w-full">
+                  <JSColorPicker
+                    value={color2}
+                    onChange={(c) => setColor2(c)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Kolor 3 (Dół-Prawo)</Label>
+                <div className="w-full">
+                  <JSColorPicker
+                    value={color3}
+                    onChange={(c) => setColor3(c)}
+                  />
+                </div>
+              </div>
+
+            </div>
+          </div>
 
           <div className="pt-4">
             <button

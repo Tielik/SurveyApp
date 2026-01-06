@@ -31,9 +31,12 @@ class SurveySerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(
         many=True, read_only=True, source='question_set')
 
-    color_1 = serializers.CharField(required=False, allow_blank=True, default="#f8fafc")
-    color_2 = serializers.CharField(required=False, allow_blank=True, default="#eef2ff")
-    color_3 = serializers.CharField(required=False, allow_blank=True, default="#F3F4F6")
+    color_1 = serializers.CharField(
+        required=False, allow_blank=True, default="#f8fafc")
+    color_2 = serializers.CharField(
+        required=False, allow_blank=True, default="#eef2ff")
+    color_3 = serializers.CharField(
+        required=False, allow_blank=True, default="#F3F4F6")
 
     class Meta:
         model = Survey
@@ -62,8 +65,10 @@ class SurveySerializer(serializers.ModelSerializer):
         def update(self, instance, validated_data):
             # Aktualizacja prostych pól Ankiety
             instance.title = validated_data.get('title', instance.title)
-            instance.description = validated_data.get('description', instance.description)
-            instance.is_active = validated_data.get('is_active', instance.is_active)
+            instance.description = validated_data.get(
+                'description', instance.description)
+            instance.is_active = validated_data.get(
+                'is_active', instance.is_active)
             instance.color_1 = validated_data.get('color_1', instance.color_1)
             instance.color_2 = validated_data.get('color_2', instance.color_2)
             instance.color_3 = validated_data.get('color_3', instance.color_3)
@@ -92,9 +97,12 @@ class UserSerializer(serializers.ModelSerializer):
         source='profile.avatar', required=False, allow_null=True)
     background_image = serializers.ImageField(
         source='profile.background_image', required=False, allow_null=True)
-    color_1 = serializers.CharField(required=False, allow_blank=True, default="#f8fafc")
-    color_2 = serializers.CharField(required=False, allow_blank=True, default="#eef2ff")
-    color_3 = serializers.CharField(required=False, allow_blank=True, default="#F3F4F6")
+    color_1 = serializers.CharField(
+        source='profile.color_1', required=False, allow_blank=True, default="#f8fafc")
+    color_2 = serializers.CharField(
+        source='profile.color_2', required=False, allow_blank=True, default="#eef2ff")
+    color_3 = serializers.CharField(
+        source='profile.color_3', required=False, allow_blank=True, default="#F3F4F6")
 
     # Pola specjalne (flagi) do usuwania zdjęć - write_only oznacza, że nie są zwracane w JSON
     delete_avatar = serializers.BooleanField(
@@ -104,7 +112,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'avatar', 'background_image', 'color_1', 'color_2', 'color_3', 'delete_avatar', 'delete_background_image']
+        fields = ['username', 'email', 'password', 'avatar', 'background_image',
+            'color_1', 'color_2', 'color_3', 'delete_avatar', 'delete_background_image']
         # ukrywanie by api nigdy nie zwracało przy odczycie
         extra_kwargs = {'password': {'write_only': True},
                         'email': {'required': True}}
@@ -121,7 +130,8 @@ class UserSerializer(serializers.ModelSerializer):
         # Tworzymy użytkownika z poprawnym hasłem i mailem.
         # Wyciągamy tylko pola obsługiwane przez model User (username, email, password),
         # resztę pól (avatar, kolory) obsłużymy w update() lub w logice profilu.
-        user_fields = {k: validated_data[k] for k in ['username', 'email', 'password']}
+        user_fields = {k: validated_data[k]
+            for k in ['username', 'email', 'password']}
         user = User.objects.create_user(**user_fields)
         return user
 
@@ -159,13 +169,15 @@ class UserSerializer(serializers.ModelSerializer):
             if new_bg:
                 profile.background_image = new_bg
 
-        # --- KOLORY ---
+
         if 'color_1' in profile_data:
-            profile.color_1 = profile_data.get('color_1')
+            profile.color_1 = profile_data['color_1']
+
         if 'color_2' in profile_data:
-            profile.color_2 = profile_data.get('color_2')
+            profile.color_2 = profile_data['color_2']
+            
         if 'color_3' in profile_data:
-            profile.color_3 = profile_data.get('color_3')
+            profile.color_3 = profile_data['color_3']
 
         profile.save()
         return instance
