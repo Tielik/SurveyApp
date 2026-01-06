@@ -2,7 +2,10 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { BarChart3, ExternalLink, Pencil, User as UserIcon, X, Upload, Image as ImageIcon, Trash2 } from "lucide-react"
 
+import { Label } from "@/components/ui/label"
+import { JSColorPicker } from "@/components/JSColorPicker"
 import type { Survey, User } from "./DashboardAction"
+
 
 type Props = {
   surveys: Survey[]
@@ -19,7 +22,7 @@ export default function DashboardView({
   onLogout,
   onToggleActive,
   onCopyVoteLink,
-  onUpdateUser
+  onUpdateUser,
 }: Props) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
 
@@ -381,29 +384,42 @@ function EditProfileModal({ user, onClose, onSubmit }: { user: User, onClose: ()
           </div>
 
           {/* Sekcja Kolorów */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-gray-900 border-b pb-1">Paleta Kolorów</h4>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex items-center gap-4">
-                <input type="color" value={color1} onChange={e => setColor1(e.target.value)} className="h-10 w-14 rounded cursor-pointer border-0 p-0" />
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Kolor 1 (Główny/Gradient)</p>
+                        <div className="space-y-3 pt-4 pb-6 border-b border-gray-100">
+                <Label>Kolorystyka ankiety</Label>
+                <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 1 (Góra-Lewo)</Label>
+                    <div className="w-full">
+                      <JSColorPicker
+                        value={color1}
+                        onChange={(c) => setColor1(c)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 2 (Środek)</Label>
+                    <div className="w-full">
+                      <JSColorPicker
+                        value={color2}
+                        onChange={(c) => setColor2(c)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Kolor 3 (Dół-Prawo)</Label>
+                    <div className="w-full">
+                      <JSColorPicker
+                        value={color3}
+                        onChange={(c) => setColor3(c)}
+                      />
+                    </div>
+                  </div>
+
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <input type="color" value={color2} onChange={e => setColor2(e.target.value)} className="h-10 w-14 rounded cursor-pointer border-0 p-0" />
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Kolor 2 (Tekst/Gradient)</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <input type="color" value={color3} onChange={e => setColor3(e.target.value)} className="h-10 w-14 rounded cursor-pointer border-0 p-0" />
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Kolor 3 (Akcent/Gradient)</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <div className="pt-4">
             <button

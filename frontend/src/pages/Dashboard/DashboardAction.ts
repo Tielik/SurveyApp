@@ -14,6 +14,8 @@ export interface User {
   color_3: string
 }
 
+export type ThemeColors = { first: string; second: string; third: string }
+
 interface Choice {
   id: number
   choice_text: string
@@ -41,6 +43,12 @@ export const useDashboardAction = () => {
   const navigate = useNavigate()
   const token = getAuthToken()
 
+    const [themeColors, setThemeColors] = useState<ThemeColors>({
+      first: "#f8fafc",
+      second: "#eef2ff",
+      third: "#f3f4f6"
+    })
+  
   const fetchSurveys = useCallback(() => {
     if (!token) {
       navigate("/")
@@ -137,10 +145,12 @@ export const useDashboardAction = () => {
   return {
     surveys,
     user,
+    themeColors,
     fetchUser,
     updateUser,
     handleLogout,
     toggleActive,
-    copyVoteLink
+    copyVoteLink,
+    setThemeColors,
   }
 }
