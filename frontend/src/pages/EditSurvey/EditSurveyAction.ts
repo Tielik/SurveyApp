@@ -6,16 +6,16 @@ import { toast } from "sonner"
 import { hasAuthToken } from "@/helpers/auth"
 import { createDraftId, validateSurveyDraft } from "@/helpers/survey-draft"
 import { surveyService } from "@/services/survey-service"
-import type { SurveyDetail, CreateSurveyPayload } from "@/types/survey"
+import type { SurveyDetail } from "@/types/survey"
 import type { SurveyIdParams } from "@/types/router"
 
 export type ChoiceDraft = { id: string; text: string; originalId?: number }
-export type QuestionDraft = { 
-  id: string; 
-  text: string; 
-  choices: ChoiceDraft[]; 
-  originalId?: number; 
-  type: 'text' | 'rating' 
+export type QuestionDraft = {
+  id: string;
+  text: string;
+  choices: ChoiceDraft[];
+  originalId?: number;
+  type: 'text' | 'rating'
 }
 export type ThemeColors = { first: string; second: string; third: string }
 
@@ -72,6 +72,12 @@ export const useEditSurveyAction = () => {
         setDescription(data.description || "")
         setIsActive(data.is_active)
 
+        setThemeColors({
+          first: data.color_1 || "#f8fafc",
+          second: data.color_2 || "#eef2ff",
+          third: data.color_3 || "#F3F4F6"
+        })
+
         setQuestions(mapSurveyToDraft(data))
         setOriginalQuestionIds(data.questions.map((q) => q.id))
         setOriginalChoiceIds(data.questions.flatMap((q) => q.choices.map((c) => c.id)))
@@ -99,7 +105,7 @@ export const useEditSurveyAction = () => {
         const isRatingSet = JSON.stringify(values) === JSON.stringify(target)
 
         if (isRatingSet) {
-             return { ...q, choices: updatedChoices, type: 'rating' }
+          return { ...q, choices: updatedChoices, type: 'rating' }
         }
 
         return { ...q, choices: updatedChoices }
@@ -110,11 +116,11 @@ export const useEditSurveyAction = () => {
   const addQuestion = () => {
     setQuestions((prev) => [
       ...prev,
-      { 
-        id: createDraftId(), 
-        type: 'text', 
-        text: "", 
-        choices: [createEmptyChoice(), createEmptyChoice()] 
+      {
+        id: createDraftId(),
+        type: 'text',
+        text: "",
+        choices: [createEmptyChoice(), createEmptyChoice()]
       },
     ])
   }
@@ -136,8 +142,8 @@ export const useEditSurveyAction = () => {
 
   const changeQuestionType = (questionId: string, newType: 'text' | 'rating') => {
     setQuestions((prev) => prev.map((q) => {
-        if (q.id !== questionId) return q;
-        return { ...q, type: newType };
+      if (q.id !== questionId) return q;
+      return { ...q, type: newType };
     }))
   }
 
@@ -176,20 +182,15 @@ export const useEditSurveyAction = () => {
     setSubmitting(true)
 
     try {
-      type ExtendedUpdatePayload = CreateSurveyPayload & {
-        theme_first_color: string;
-        theme_second_color: string;
-        theme_third_color: string;
-      };
 
       await surveyService.updateSurvey(Number(id), {
         title,
         description,
         is_active: isActive,
-        theme_first_color: themeColors.first,
-        theme_second_color: themeColors.second,
-        theme_third_color: themeColors.third,
-      } as ExtendedUpdatePayload)
+        color_1: themeColors.first,
+        color_2: themeColors.second,
+        color_3: themeColors.third,
+      } as any)
 
       const savedQuestionIds: number[] = []
       const savedChoiceIds: number[] = []

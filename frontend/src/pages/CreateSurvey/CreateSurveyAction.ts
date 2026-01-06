@@ -139,7 +139,10 @@ export const useCreateSurveyAction = () => {
         description, 
         is_active: isActive,
         recaptcha_token: recaptchaToken,
-      })
+        color_1: themeColors.first,
+        color_2: themeColors.second,
+        color_3: themeColors.third,
+      } as any)
 
       for (const question of questions) {
         const questionResponse = await surveyService.createQuestion({

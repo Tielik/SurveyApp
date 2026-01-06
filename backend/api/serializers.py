@@ -31,6 +31,10 @@ class SurveySerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(
         many=True, read_only=True, source='question_set')
 
+    color_1 = serializers.CharField(required=False, allow_blank=True, default="#f8fafc")
+    color_2 = serializers.CharField(required=False, allow_blank=True, default="#eef2ff")
+    color_3 = serializers.CharField(required=False, allow_blank=True, default="#F3F4F6")
+
     class Meta:
         model = Survey
         fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active', 'color_1', 'color_2',
@@ -88,9 +92,9 @@ class UserSerializer(serializers.ModelSerializer):
         source='profile.avatar', required=False, allow_null=True)
     background_image = serializers.ImageField(
         source='profile.background_image', required=False, allow_null=True)
-    color_1 = serializers.CharField(source='profile.color_1', required=False)
-    color_2 = serializers.CharField(source='profile.color_2', required=False)
-    color_3 = serializers.CharField(source='profile.color_3', required=False)
+    color_1 = serializers.CharField(required=False, allow_blank=True, default="#f8fafc")
+    color_2 = serializers.CharField(required=False, allow_blank=True, default="#eef2ff")
+    color_3 = serializers.CharField(required=False, allow_blank=True, default="#F3F4F6")
 
     # Pola specjalne (flagi) do usuwania zdjęć - write_only oznacza, że nie są zwracane w JSON
     delete_avatar = serializers.BooleanField(
