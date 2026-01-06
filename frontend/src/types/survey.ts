@@ -4,6 +4,9 @@ export type SurveyResponse = {
   description: string
   access_code: string
   is_active: boolean
+  color_1?: string;
+  color_2?: string;
+  color_3?: string;
 }
 
 export type SurveyDetail = SurveyResponse & {
@@ -15,6 +18,9 @@ export type SurveyDetail = SurveyResponse & {
       choice_text: string
       votes: number
     }>
+    color_1?: string;
+    color_2?: string;
+    color_3?: string;
   }>
 }
 
@@ -23,6 +29,9 @@ export type CreateSurveyPayload = {
   description?: string
   is_active?: boolean
   recaptcha_token?: string
+  color_1?: string
+  color_2?: string
+  color_3?: string
 }
 
 export type CreateQuestionPayload = {

@@ -5,6 +5,17 @@ import { toast } from "sonner"
 
 import { getAuthToken } from "@/helpers/auth"
 
+export interface User {
+  username: string
+  avatar: string | null
+  background_image: string | null
+  color_1: string
+  color_2: string
+  color_3: string
+}
+
+export type ThemeColors = { first: string; second: string; third: string }
+
 interface Choice {
   id: number
   choice_text: string
@@ -28,10 +39,17 @@ export interface Survey {
 
 export const useDashboardAction = () => {
   const [surveys, setSurveys] = useState<Survey[]>([])
+  const [user, setUser] = useState<User | null>(null)
   const navigate = useNavigate()
+  const token = getAuthToken()
 
+    const [themeColors, setThemeColors] = useState<ThemeColors>({
+      first: "#f8fafc",
+      second: "#eef2ff",
+      third: "#f3f4f6"
+    })
+  
   const fetchSurveys = useCallback(() => {
-    const token = getAuthToken()
     if (!token) {
       navigate("/")
       return
@@ -45,9 +63,45 @@ export const useDashboardAction = () => {
       .catch((error) => console.error(error))
   }, [navigate])
 
+  const fetchUser = useCallback(() => {
+    if (!token) return
+
+    axios
+      .get("http://127.0.0.1:8000/api/profile/me/", {
+        headers: { Authorization: `Token ${token}` },
+      })
+      .then((response) => setUser(response.data))
+      .catch((error) => console.error("Błąd pobierania profilu:", error))
+  }, [token])
+
   useEffect(() => {
     fetchSurveys()
-  }, [fetchSurveys])
+    fetchUser()
+  }, [fetchSurveys, fetchUser])
+
+  const updateUser = async (formData: FormData) => {
+    if (!token) return false
+
+    try {
+      const response = await axios.patch(
+        "http://127.0.0.1:8000/api/profile/me/",
+        formData,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      setUser(response.data)
+      toast.success("Profil zaktualizowany!")
+      return true
+    } catch (error) {
+      console.error(error)
+      toast.error("Błąd aktualizacji profilu")
+      return false
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("token")
@@ -73,7 +127,7 @@ export const useDashboardAction = () => {
         { headers: { Authorization: `Token ${token}` } },
       )
       .then(() => {
-        toast.success(!survey.is_active ? "Ankieta opublikowana" : "Ankieta przeniesiona do szkicow")
+        toast.success(!survey.is_active ? "Ankieta opublikowana" : "Ankieta przeniesiona do szkiców")
       })
       .catch(() => {
         toast.error("Blad aktualizacji statusu")
@@ -88,5 +142,15 @@ export const useDashboardAction = () => {
       .catch(() => toast.error("Blad kopiowania"))
   }
 
-  return { surveys, handleLogout, toggleActive, copyVoteLink }
+  return {
+    surveys,
+    user,
+    themeColors,
+    fetchUser,
+    updateUser,
+    handleLogout,
+    toggleActive,
+    copyVoteLink,
+    setThemeColors,
+  }
 }

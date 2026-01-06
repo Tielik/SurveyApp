@@ -43,10 +43,17 @@ export default function VoteView({
   if (error) return <div className="p-10 text-center text-red-500 font-bold">{error}</div>
   if (!survey) return null
 
+  const { color_1, color_2, color_3 } = survey
+  
+  const validColors = [color_1, color_2, color_3].filter((c): c is string => !!c && c.trim() !== "")
+
   const missingQuestions = survey.questions.filter((q) => missingQuestionIds.includes(q.id))
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4 font-sans">
+    <div className="min-h-screen py-10 px-4 font-sans"
+      style={{
+        background: `linear-gradient(to bottom right, ${validColors[0]}, ${validColors[1]}, ${validColors[2]})`
+      }}>
       <div className="mx-auto max-w-2xl overflow-hidden rounded-xl bg-white shadow-lg">
         <div className="bg-blue-600 p-8 text-center text-white">
           <h1 className="mb-2 text-3xl font-bold">{survey.title}</h1>
