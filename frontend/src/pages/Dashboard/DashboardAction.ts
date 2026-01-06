@@ -119,7 +119,7 @@ export const useDashboardAction = () => {
         { headers: { Authorization: `Token ${token}` } },
       )
       .then(() => {
-        toast.success(!survey.is_active ? "Ankieta opublikowana" : "Ankieta przeniesiona do szkicow")
+        toast.success(!survey.is_active ? "Ankieta opublikowana" : "Ankieta przeniesiona do szkiców")
       })
       .catch(() => {
         toast.error("Blad aktualizacji statusu")
