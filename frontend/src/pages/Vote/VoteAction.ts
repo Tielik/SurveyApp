@@ -5,7 +5,15 @@ import { toast } from "sonner"
 
 export type Choice = { id: number; choice_text: string; votes: number }
 type Question = { id: number; question_text: string; choices: Choice[] }
-export type Survey = { id: number; title: string; description: string; questions: Question[] }
+export type Survey = {
+  id: number;
+  title: string;
+  description: string;
+  questions: Question[];
+  color_1?: string | null;
+  color_2?: string | null;
+  color_3?: string | null;
+}
 
 export const useVoteAction = () => {
   const { code } = useParams()

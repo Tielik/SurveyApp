@@ -18,6 +18,9 @@ export type SurveyDetail = SurveyResponse & {
       choice_text: string
       votes: number
     }>
+    color_1?: string;
+    color_2?: string;
+    color_3?: string;
   }>
 }
 
