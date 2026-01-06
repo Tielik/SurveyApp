@@ -33,7 +33,8 @@ class SurveySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Survey
-        fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active','color_1', 'color_2','color_3']
+        fields = ['id', 'title', 'description',
+                  'questions', 'access_code', 'is_active']
         read_only_fields = ['access_code']
 
         def create(self, validated_data):
@@ -57,11 +58,10 @@ class SurveySerializer(serializers.ModelSerializer):
         def update(self, instance, validated_data):
             # Aktualizacja prostych pól Ankiety
             instance.title = validated_data.get('title', instance.title)
-            instance.description = validated_data.get('description', instance.description)
-            instance.is_active = validated_data.get('is_active', instance.is_active)
-            instance.color_1 = validated_data.get('color_1', instance.color_1)
-            instance.color_2 = validated_data.get('color_2', instance.color_2)
-            instance.color_3 = validated_data.get('color_3', instance.color_3)
+            instance.description = validated_data.get(
+                'description', instance.description)
+            instance.is_active = validated_data.get(
+                'is_active', instance.is_active)
             instance.save()
             #  Obsługa pytań (Strategia: Usuń stare i stwórz nowe)
             # To najprostsza strategia dla prototypu. Przy PUT kasujemy stare pytania
@@ -99,11 +99,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'avatar', 'background_image', 'color_1', 'color_2','color_3']
+        fields = ['username', 'password', 'avatar', 'background_image', 'color_1',
+                  'color_2', 'color_3', 'delete_avatar', 'delete_background_image']
         # ukrywanie by api nigdy nie zwracało przy odczycie
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        # Usuwamy pola profilu z validated_data, bo create_user ich nie przyjmuje
+        validated_data.pop('profile', None)
+        validated_data.pop('delete_avatar', None)
+        validated_data.pop('delete_background_image', None)
+
         # dzięki temu przy tworzeniu nowego użytkownika hasło jest szyfrowane
         user = User.objects.create_user(**validated_data)
         return user
