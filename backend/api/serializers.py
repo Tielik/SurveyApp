@@ -100,7 +100,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'avatar', 'background_image', 'color_1', 'color_2', 'color_3']
+        fields = ['username', 'email', 'password', 'avatar', 'background_image', 'color_1', 'color_2', 'color_3', 'delete_avatar', 'delete_background_image']
         # ukrywanie by api nigdy nie zwracało przy odczycie
         extra_kwargs = {'password': {'write_only': True},
                         'email': {'required': True}}
