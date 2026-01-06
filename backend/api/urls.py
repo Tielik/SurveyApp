@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import SurveyViewSet, QuestionViewSet, ChoiceViewSet,RegisterView, ProfileViewSet, PasswordViewSet
+from .views import verify_email
 
 # Router to taki automatyczny recepcjonista
 # Sam stworzy adresy typu /surveys/, /surveys/1/, /questions/ itp.
@@ -12,5 +13,6 @@ router.register(r'register', RegisterView)
 router.register(r'profile', ProfileViewSet, basename='profile')
 router.register(r'password', PasswordViewSet, basename='password')
 urlpatterns = [
+    path('verify-email/<uuid:token>/', verify_email),
     path('', include(router.urls)),
 ]
