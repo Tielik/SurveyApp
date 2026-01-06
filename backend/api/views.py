@@ -13,10 +13,6 @@ import urllib.request
 
 
 def verify_recaptcha_token(token, remoteip=None):
-    # DEBUG, ominięcie tokenu recaptcha
-    if getattr(settings, "DEBUG", True):
-      return True, None 
-    
     if not token:
         return False, "Brak tokenu reCAPTCHA."
 
@@ -58,15 +54,6 @@ class RecaptchaAuthToken(ObtainAuthToken):
         )
         if not ok:
             return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
-        
-         # blokada jeśli mail niezweryfikowany
-        username = request.data.get("username")
-        user = User.objects.filter(username=username).first()
-        if user and not user.profile.is_email_verified:
-            return Response(
-                {"error": "Email nie został zweryfikowany. Sprawdź skrzynkę pocztową."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         return super().post(request, *args, **kwargs)
 
 
@@ -243,16 +230,6 @@ class RegisterView(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        user = serializer.instance
-
-        profile, _ = Profile.objects.get_or_create(user=user)
-        profile.is_email_verified = False
-        profile.email_verification_token = uuid.uuid4()
-        profile.save()
-
-        send_verification_email(user.email, profile.email_verification_token)
-
-
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

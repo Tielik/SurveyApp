@@ -33,8 +33,8 @@ class SurveySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Survey
-        fields = ['id', 'title', 'description', 'questions', 'access_code', 'is_active', 'color_1', 'color_2',
-                  'color_3']
+        fields = ['id', 'title', 'description',
+                  'questions', 'access_code', 'is_active']
         read_only_fields = ['access_code']
 
         def create(self, validated_data):
@@ -58,11 +58,10 @@ class SurveySerializer(serializers.ModelSerializer):
         def update(self, instance, validated_data):
             # Aktualizacja prostych pól Ankiety
             instance.title = validated_data.get('title', instance.title)
-            instance.description = validated_data.get('description', instance.description)
-            instance.is_active = validated_data.get('is_active', instance.is_active)
-            instance.color_1 = validated_data.get('color_1', instance.color_1)
-            instance.color_2 = validated_data.get('color_2', instance.color_2)
-            instance.color_3 = validated_data.get('color_3', instance.color_3)
+            instance.description = validated_data.get(
+                'description', instance.description)
+            instance.is_active = validated_data.get(
+                'is_active', instance.is_active)
             instance.save()
             #  Obsługa pytań (Strategia: Usuń stare i stwórz nowe)
             # To najprostsza strategia dla prototypu. Przy PUT kasujemy stare pytania
@@ -100,25 +99,19 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'avatar', 'background_image', 'color_1', 'color_2', 'color_3']
+        fields = ['username', 'password', 'avatar', 'background_image', 'color_1',
+                  'color_2', 'color_3', 'delete_avatar', 'delete_background_image']
         # ukrywanie by api nigdy nie zwracało przy odczycie
-        extra_kwargs = {'password': {'write_only': True},
-                        'email': {'required': True}}
-
-    # Sprawdza czy konto z podanym mailem już istnieje
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                "Konto z tym adresem email już istnieje."
-            )
-        return value
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        # Tworzymy użytkownika z poprawnym hasłem i mailem.
-        # Wyciągamy tylko pola obsługiwane przez model User (username, email, password),
-        # resztę pól (avatar, kolory) obsłużymy w update() lub w logice profilu.
-        user_fields = {k: validated_data[k] for k in ['username', 'email', 'password']}
-        user = User.objects.create_user(**user_fields)
+        # Usuwamy pola profilu z validated_data, bo create_user ich nie przyjmuje
+        validated_data.pop('profile', None)
+        validated_data.pop('delete_avatar', None)
+        validated_data.pop('delete_background_image', None)
+
+        # dzięki temu przy tworzeniu nowego użytkownika hasło jest szyfrowane
+        user = User.objects.create_user(**validated_data)
         return user
 
     def update(self, instance, validated_data):
@@ -132,8 +125,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         # Aktualizacja User (np. username)
         instance.username = validated_data.get('username', instance.username)
-        email = validated_data.get('email', instance.email)
-        instance.email = email  # upewniamy się, że email zostanie zapisany
         instance.save()
 
         # --- LOGIKA AVATARA ---
