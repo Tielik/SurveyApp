@@ -13,7 +13,7 @@ export default function RegisterView({ error, loading, onSubmit }: Props) {
   return (
     <AuthLayout>
       <AuthCard
-        title="Dołącz do nas"
+        title="Do‘'Žcz do nas"
         description="Zaloz konto i zacznij zbierac odpowiedzi."
         actionHref="/"
         actionLabel="Masz juz konto? Zaloguj sie"
