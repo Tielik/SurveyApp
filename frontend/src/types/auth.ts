@@ -3,6 +3,10 @@ export type Credentials = {
   password: string
 }
 
+export type RegisterCredentials = Credentials & {
+  email: string
+}
+
 export type AuthTokenResponse = {
   token: string
 }
