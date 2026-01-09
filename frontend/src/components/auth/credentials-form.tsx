@@ -41,7 +41,6 @@ export function CredentialsForm(props: CredentialsFormProps) {
   const {
     submitLabel,
     loadingLabel,
-    onSubmit,
     error,
     loading = false,
     usernameAutocomplete = "username",
@@ -74,10 +73,15 @@ export function CredentialsForm(props: CredentialsFormProps) {
         setRecaptchaError("Podaj adres email.")
         return
       }
-      await onSubmit({ ...values, email }, recaptchaToken)
+      const payload: RegisterCredentials = {
+        username: values.username,
+        password: values.password,
+        email,
+      }
+      await props.onSubmit(payload, recaptchaToken)
       return
     }
-    await onSubmit(values, recaptchaToken)
+    await props.onSubmit({ username: values.username, password: values.password }, recaptchaToken)
   }
 
   const isDisabled =
