@@ -1,8 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import type { SurveyDetail } from "@/types/survey";
 
-// Rejestracja czcionki dla polskich znaków (opcjonalne, ale zalecane)
-// Możesz tu podać ścieżkę do lokalnego pliku .ttf w public/fonts
 Font.register({
   family: 'Roboto',
   src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-medium-webfont.ttf'
