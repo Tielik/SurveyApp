@@ -34,7 +34,7 @@ export default function QuestionResultsChart({ question }: Props) {
         )
       })}
       {totalVotes === 0 && (
-        <p className="text-xs italic text-gray-400">Brak glosow - wykres zaktualizuje sie po pierwszym glosie.</p>
+        <p className="text-xs italic text-gray-400">Brak głosów - wykres zaktualizuje się po pierwszym głosie.</p>
       )}
     </div>
   )

@@ -1,5 +1,8 @@
 import { Link } from "react-router-dom"
+import { PDFDownloadLink } from "@react-pdf/renderer"
+import { Download, Loader2 } from "lucide-react"
 
+import { SurveyPDF } from "@/components/SurveyPDF"
 import QuestionResultsChart from "@/components/QuestionResultsChart"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -47,13 +50,35 @@ export default function SurveyResultsView({
           </div>
           <div className="flex gap-3">
             <Button asChild variant="outline">
-              <Link to="/dashboard">Wroc</Link>
+              <Link to="/dashboard">Wróć</Link>
             </Button>
             <Button asChild>
               <Link to={`/vote/${survey.access_code}`} target="_blank">
-                Otworz glosowanie
+                Otwórz głosowanie
               </Link>
             </Button>
+            <PDFDownloadLink
+              document={<SurveyPDF survey={survey} totalVotes={totalVotesAll} />}
+              fileName={`wyniki_ankiety_${survey.id}.pdf`}
+            >
+              {({ loading }: { loading: boolean }) => (
+                <Button
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generowanie...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Zapisz jako PDF
+                    </>
+                  )}
+                </Button>
+              )}
+            </PDFDownloadLink>
           </div>
         </div>
 
@@ -107,15 +132,15 @@ export default function SurveyResultsView({
             <CardContent>
               <ul className="space-y-3 text-sm text-gray-700">
                 <li className="flex items-center justify-between">
-                  <span>Liczba pytan</span>
+                  <span>Liczba pytań</span>
                   <span className="font-semibold">{survey.questions.length}</span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span>Suma glosow</span>
+                  <span>Suma głosów</span>
                   <span className="font-semibold">{totalVotesAll}</span>
                 </li>
                 <li className="flex items-center justify-between">
-                  <span>Link do glosowania</span>
+                  <span>Link do głosowania</span>
                   <span className="font-mono text-xs text-indigo-600 break-all">
                     /vote/{survey.access_code}
                   </span>
@@ -133,7 +158,7 @@ export default function SurveyResultsView({
                   {idx + 1}. {q.question_text}
                 </CardTitle>
                 <span className="text-xs font-mono text-gray-500">
-                  Suma glosow: {q.choices.reduce((acc, c) => acc + c.votes, 0)}
+                  Suma głosów: {q.choices.reduce((acc, c) => acc + c.votes, 0)}
                 </span>
               </CardHeader>
               <CardContent>
@@ -142,10 +167,10 @@ export default function SurveyResultsView({
             </Card>
           ))}
           {survey.questions.length === 0 && (
-            <p className="text-center text-gray-400">Brak pytan do wyswietlenia.</p>
+            <p className="text-center text-gray-400">Brak pytań do wyświetlenia.</p>
           )}
         </div>
       </div>
-    </div>
+    </div >
   )
 }

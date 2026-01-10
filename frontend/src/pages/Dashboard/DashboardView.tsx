@@ -207,7 +207,7 @@ export default function DashboardView({
                       type="button"
                       className="hover:bg-indigo-600 rounded-full hover:text-white px-2 py-1 transition-colors"
                       onClick={() => onCopyVoteLink(survey.access_code)}
-                      title="Kopiuj link do glosowania"
+                      title="Kopiuj link do głosowania"
                     >
                       <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -243,10 +243,10 @@ export default function DashboardView({
                       to={`/vote/${survey.access_code}`}
                       target="_blank"
                       className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
-                      title="Otworz glosowanie"
+                      title="Otworz głosowanie"
                     >
                       <ExternalLink className="h-4 w-4" />
-                      <span className="sr-only">Otworz glosowanie</span>
+                      <span className="sr-only">Otworz głosowanie</span>
                     </Link>
                   </div>
                 </div>
