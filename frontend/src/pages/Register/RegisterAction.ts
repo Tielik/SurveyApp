@@ -2,14 +2,14 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { authService } from "@/services/auth-service"
-import type { Credentials } from "@/types/auth"
+import type { RegisterCredentials } from "@/types/auth"
 
 export const useRegisterAction = () => {
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleRegister = async (values: Credentials, recaptchaToken: string) => {
+  const handleRegister = async (values: RegisterCredentials, recaptchaToken: string) => {
     try {
       setLoading(true)
       setError(null)

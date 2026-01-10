@@ -1,12 +1,12 @@
 import { AuthCard } from "@/components/auth/auth-card"
 import { AuthLayout } from "@/components/auth/auth-layout"
 import { CredentialsForm } from "@/components/auth/credentials-form"
-import type { Credentials } from "@/types/auth"
+import type { RegisterCredentials} from "@/types/auth"
 
 type Props = {
   error: string | null
   loading: boolean
-  onSubmit: (values: Credentials, recaptchaToken: string) => Promise<void>
+  onSubmit: (values: RegisterCredentials, recaptchaToken: string) => Promise<void>
 }
 
 export default function RegisterView({ error, loading, onSubmit }: Props) {
@@ -26,6 +26,7 @@ export default function RegisterView({ error, loading, onSubmit }: Props) {
           error={error}
           loading={loading}
           passwordAutocomplete="new-password"
+          variant="register"
         />
       </AuthCard>
     </AuthLayout>
