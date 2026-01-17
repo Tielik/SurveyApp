@@ -14,13 +14,13 @@ export default function LoginView({ error, loading, onSubmit }: Props) {
     <AuthLayout>
       <AuthCard
         title="Witaj ponownie"
-        description="Zaloguj sie, aby zarzadzac ankietami."
+        description="Zaloguj się, aby zarządzać ankietami"
         actionHref="/register"
-        actionLabel="Nie masz konta? Zarejestruj sie"
+        actionLabel="Nie masz konta? Zarejestruj się"
         actionIcon="register"
       >
         <CredentialsForm
-          submitLabel="Zaloguj sie"
+          submitLabel="Zaloguj się"
           loadingLabel="Logowanie..."
           onSubmit={onSubmit}
           error={error}

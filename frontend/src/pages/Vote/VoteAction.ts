@@ -89,7 +89,7 @@ export const useVoteAction = () => {
       if (Array.isArray(missingFromServer)) {
         setMissingQuestionIds(missingFromServer)
       }
-      toast.error("Nie udalo sie wyslac odpowiedzi.")
+      toast.error("Nie udalo się wysłać odpowiedzi.")
     } finally {
       setSubmitting(false)
     }

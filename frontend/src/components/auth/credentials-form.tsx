@@ -91,7 +91,7 @@ export function CredentialsForm(props: CredentialsFormProps) {
     <form onSubmit={handleSubmit} className={cn("space-y-6", className)}>
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Nie udało się</AlertTitle>
+          <AlertTitle></AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -111,6 +111,7 @@ export function CredentialsForm(props: CredentialsFormProps) {
                 onChange={(event) => handleChange("email")(event.target.value)}
                 className="pl-10"
                 autoComplete="email"
+                pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                 required
               />
             </div>
@@ -125,7 +126,10 @@ export function CredentialsForm(props: CredentialsFormProps) {
               name="username"
               placeholder="np. jan.kowalski"
               value={values.username}
-              onChange={(event) => handleChange("username")(event.target.value)}
+              onChange={(event) => {
+                const valueWithoutSpaces = event.target.value.replace(/\s/g, "");
+                handleChange("username")(valueWithoutSpaces);
+              }}
               className="pl-10"
               autoComplete={usernameAutocomplete}
               required

@@ -14,13 +14,13 @@ export default function RegisterView({ error, loading, onSubmit }: Props) {
     <AuthLayout>
       <AuthCard
         title="Dołącz do nas"
-        description="Zaloz konto i zacznij zbierac odpowiedzi."
+        description="Załóż konto i zacznij zbierać odpowiedzi"
         actionHref="/"
-        actionLabel="Masz juz konto? Zaloguj sie"
+        actionLabel="Masz już konto? Zaloguj się"
         actionIcon="login"
       >
         <CredentialsForm
-          submitLabel="Zaloz konto"
+          submitLabel="Załóż konto"
           loadingLabel="Tworzenie konta..."
           onSubmit={onSubmit}
           error={error}

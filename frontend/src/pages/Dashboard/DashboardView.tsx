@@ -94,7 +94,7 @@ export default function DashboardView({
 
             <Link
               to="/surveys/create"
-              className="cursor-pointer text-white px-4 py-2 rounded-lg bg-indigo-500 font-bold shadow-md hover:shadow-lg transition-all"
+              className="cursor-pointer text-white px-4 py-2 rounded-lg bg-indigo-700 font-bold shadow-md hover:shadow-lg transition-all"
             >
               Utwórz ankietę
             </Link>

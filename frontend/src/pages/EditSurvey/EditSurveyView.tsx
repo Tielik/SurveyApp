@@ -77,7 +77,7 @@ export default function EditSurveyView({
     >
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
-          <Button asChild variant="ghost" className="gap-2">
+          <Button asChild className="bg-white text-black hover:bg-gray-100">
             <Link to="/dashboard">
               <ArrowLeft className="h-4 w-4" />
               Wróć do panelu
@@ -88,7 +88,7 @@ export default function EditSurveyView({
         <Card className="backdrop-blur">
           <CardHeader>
             <CardTitle>Edytuj ankietę</CardTitle>
-            <CardDescription>Zaktualizuj treść i odpowiedzi, następnie zapisz.</CardDescription>
+            <CardDescription>Zaktualizuj treść i odpowiedzi, następnie zapisz</CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-8" onSubmit={handleSubmit}>
@@ -278,7 +278,7 @@ export default function EditSurveyView({
                   )}
                 </Button>
                 <p className="text-sm text-muted-foreground">
-                  Po zapisaniu zmiany będą widoczne w głosowaniu.
+                  Po zapisaniu zmiany będą widoczne w głosowaniu
                 </p>
               </div>
             </form>

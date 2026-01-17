@@ -17,7 +17,7 @@ export const useRegisterAction = () => {
       navigate("/")
     } catch (err) {
       console.error("Registration failed", err)
-      setError("Nie udalo sie utworzyc konta. Upewnij sie, ze login jest unikalny.")
+      setError("Nie udało się utworzyć konta. Upewnij się, że e-mail oraz login są unikalne")
     } finally {
       setLoading(false)
     }

@@ -18,7 +18,7 @@ export const useLoginAction = () => {
       navigate("/dashboard")
     } catch (err) {
       console.error("Login failed", err)
-      setError("Błędny login, nazwa lub niezweryfikowany email. Spróbuj ponownie!")
+      setError("Błędny login lub niezweryfikowany e-mail. Spróbuj ponownie!")
     } finally {
       setLoading(false)
     }
