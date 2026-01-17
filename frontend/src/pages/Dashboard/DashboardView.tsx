@@ -14,6 +14,7 @@ type Props = {
   onToggleActive: (survey: Survey) => void
   onCopyVoteLink: (accessCode: string) => void
   onUpdateUser: (formData: FormData) => Promise<boolean>
+  onDeleteSurvey: (surveyId: number) => void
 }
 
 export default function DashboardView({
@@ -23,8 +24,16 @@ export default function DashboardView({
   onToggleActive,
   onCopyVoteLink,
   onUpdateUser,
+  onDeleteSurvey,
 }: Props) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [surveyToDelete, setSurveyToDelete] = useState<Survey | null>(null);
+
+  const openDeleteModal = (survey: Survey) => {
+    setSurveyToDelete(survey);
+    setIsDeleteModalOpen(true);
+  };
 
   const dynamicBackgroundStyle = useMemo(() => {
     if (!user) {
@@ -205,7 +214,7 @@ export default function DashboardView({
                   <div className="flex items-center gap-2 text-gray-500 text-sm overflow-hidden">
                     <button
                       type="button"
-                      className="hover:bg-indigo-600 rounded-full hover:text-white px-2 py-1 transition-colors"
+                      className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
                       onClick={() => onCopyVoteLink(survey.access_code)}
                       title="Kopiuj link do głosowania"
                     >
@@ -234,19 +243,28 @@ export default function DashboardView({
                     <Link
                       to={`/surveys/${survey.id}/edit`}
                       className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
-                      title="Edytuj ankiete"
+                      title="Edytuj ankietę"
                     >
                       <Pencil className="h-4 w-4" />
                       <span className="sr-only">Edytuj</span>
                     </Link>
+                    <button
+                      type="button"
+                      className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
+                      title="Usuń ankietę"
+                      onClick={() => openDeleteModal(survey)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Usuń ankietę</span>
+                    </button>
                     <Link
                       to={`/vote/${survey.access_code}`}
                       target="_blank"
                       className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-full p-2 transition-colors"
-                      title="Otworz głosowanie"
+                      title="Otwórz głosowanie"
                     >
                       <ExternalLink className="h-4 w-4" />
-                      <span className="sr-only">Otworz głosowanie</span>
+                      <span className="sr-only">Otwórz głosowanie</span>
                     </Link>
                   </div>
                 </div>
@@ -261,6 +279,35 @@ export default function DashboardView({
           onClose={() => setIsEditProfileOpen(false)}
           onSubmit={onUpdateUser}
         />
+      )}
+
+      {isDeleteModalOpen && surveyToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h3 className="text-lg font-bold mb-4">Potwierdź usunięcie</h3>
+            <p className="text-gray-600 mb-6">
+              Czy na pewno chcesz usunąć ankietę <strong>{surveyToDelete.title}</strong>?
+              Tej operacji nie da się cofnąć.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+              >
+                Anuluj
+              </button>
+              <button
+                onClick={() => {
+                  onDeleteSurvey(surveyToDelete.id);
+                  setIsDeleteModalOpen(false);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Usuń
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

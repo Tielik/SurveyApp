@@ -5,6 +5,7 @@ import { toast } from "sonner"
 
 import { getAuthToken } from "@/helpers/auth"
 
+
 export interface User {
   username: string
   avatar: string | null
@@ -43,12 +44,12 @@ export const useDashboardAction = () => {
   const navigate = useNavigate()
   const token = getAuthToken()
 
-    const [themeColors, setThemeColors] = useState<ThemeColors>({
-      first: "#f8fafc",
-      second: "#eef2ff",
-      third: "#f3f4f6"
-    })
-  
+  const [themeColors, setThemeColors] = useState<ThemeColors>({
+    first: "#f8fafc",
+    second: "#eef2ff",
+    third: "#f3f4f6"
+  })
+
   const fetchSurveys = useCallback(() => {
     if (!token) {
       navigate("/")
@@ -142,6 +143,23 @@ export const useDashboardAction = () => {
       .catch(() => toast.error("Blad kopiowania"))
   }
 
+  const deleteSurvey = async (surveyId: number) => {
+    const token = getAuthToken();
+    if (!token) return;
+
+    try {
+      await axios.delete(`http://127.0.0.1:8000/api/surveys/${surveyId}/`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+
+      setSurveys((prev) => prev.filter((s) => s.id !== surveyId));
+      toast.success("Ankieta została pomyślnie usunięta");
+    } catch (error) {
+      console.error("Błąd podczas usuwania:", error);
+      toast.error("Nie można usunąć aktywnej ankiety! Najpierw zmień jej status na szkic");
+    }
+  };
+
   return {
     surveys,
     user,
@@ -152,5 +170,6 @@ export const useDashboardAction = () => {
     toggleActive,
     copyVoteLink,
     setThemeColors,
+    deleteSurvey,
   }
 }

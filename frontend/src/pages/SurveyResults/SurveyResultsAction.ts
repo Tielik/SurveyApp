@@ -29,8 +29,8 @@ export const useSurveyResultsAction = () => {
       .getSurvey(Number(id))
       .then(setSurvey)
       .catch(() => {
-        setError("Nie znaleziono ankiety albo brak uprawnien.")
-        toast.error("Nie znaleziono ankiety albo brak uprawnien.")
+        setError("Nie znaleziono ankiety albo brak uprawnień")
+        toast.error("Nie znaleziono ankiety albo brak uprawnień")
       })
       .finally(() => setLoading(false))
   }, [id, navigate, stateSurvey])

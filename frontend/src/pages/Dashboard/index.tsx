@@ -8,7 +8,8 @@ export default function Dashboard() {
       handleLogout, 
       toggleActive, 
       copyVoteLink, 
-      updateUser 
+      updateUser,
+      deleteSurvey
   } = useDashboardAction()
 
 return (
@@ -19,6 +20,7 @@ return (
       onToggleActive={toggleActive}
       onCopyVoteLink={copyVoteLink}
       onUpdateUser={updateUser}
+      onDeleteSurvey={deleteSurvey}
     />
   )
 }

@@ -102,7 +102,7 @@ class SurveyViewSet(viewsets.ModelViewSet):
         # Np. Nie pozwól usunąć ankiety, która jest publicznie dostępna (is_active=True)
         if survey.is_active:
             return Response(
-                {"error": "Nie można usunąć aktywnej ankiety! Najpierw zmień jej status na szkic ."},
+                {"error": "Nie można usunąć aktywnej ankiety! Najpierw zmień jej status na szkic"},
                 status=status.HTTP_400_BAD_REQUEST
             )
         # 3. Jeśli warunki są spełnione -> Usuwamy
