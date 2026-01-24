@@ -7,6 +7,7 @@ from .serializers import SurveySerializer, QuestionSerializer, ChoiceSerializer,
     ChangePasswordSerializer
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.shortcuts import redirect
 import json
 import urllib.parse
 import urllib.request
@@ -363,7 +364,12 @@ def send_verification_email(user_email, token):
     verification_link = f"http://127.0.0.1:8000/api/verify-email/{token}/"
     subject = "Potwierdź swój email"
     message = f"Cześć!\n\nKliknij w link, aby zweryfikować swój email:\n{verification_link}"
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user_email])
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user_email],
+        fail_silently=False)
 
     # POST /api/surveys/{id}/rate/
     @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
@@ -414,3 +420,17 @@ def send_verification_email(user_email, token):
             {"detail": "Oceny zapisane poprawnie"},
             status=status.HTTP_200_OK
         )
+
+@api_view(['GET'])
+def verify_email(request, token):
+    try:
+        profile = Profile.objects.get(email_verification_token=token)
+        
+        if not profile.is_email_verified:
+            profile.is_email_verified = True
+            profile.save()
+
+        return redirect("http://localhost:5173/emailconfirmation?status=success")
+    
+    except Profile.DoesNotExist:
+        return redirect("http://localhost:5173/emailconfirmation?status=error")

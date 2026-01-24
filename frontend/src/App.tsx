@@ -6,6 +6,7 @@ import Register from './pages/Register'
 import CreateSurvey from './pages/CreateSurvey'
 import EditSurvey from './pages/EditSurvey'
 import SurveyResults from './pages/SurveyResults'
+import EmailConfirmation from './pages/EmailConfirmation'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/emailconfirmation" element={<EmailConfirmation />} />
         <Route path="/surveys/create" element={<CreateSurvey />} />
         <Route path="/surveys/:id/edit" element={<EditSurvey />} />
         <Route path="/surveys/:id/results" element={<SurveyResults />} />
