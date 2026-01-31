@@ -159,7 +159,7 @@ export default function VoteView({
                 if (token) setRecaptchaError(null)
               }}
               onExpired={() => setRecaptchaToken("")}
-              onError={() => setRecaptchaError("Błąd reCAPTCHA. Spróbuj ponownie.")}
+              onError={() => {}}
             />
             {recaptchaError && <p className="text-sm text-red-500">{recaptchaError}</p>}
           </div>

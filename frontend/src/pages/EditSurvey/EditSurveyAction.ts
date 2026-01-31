@@ -159,11 +159,13 @@ export const useEditSurveyAction = () => {
     )
   }
 
-  const removeChoice = (questionId: string) => {
+  const removeChoice = (questionId: string, choiceId: string) => {
     setQuestions((prev) =>
-      prev.map((q) =>
-        q.id === questionId ? { ...q, choices: [...q.choices, createEmptyChoice()] } : q,
-      ),
+      prev.map((q) => {
+        if (q.id !== questionId) return q
+        if (q.choices.length <= 2) return q
+        return { ...q, choices: q.choices.filter((c) => c.id !== choiceId) }
+      }),
     )
   }
 
