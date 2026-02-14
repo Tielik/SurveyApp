@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "server/survey_app/wsgi.py", 
+            "src": "server/backend/core/wsgi.py", 
             "use": "@vercel/python"
         },
         {
@@ -12,7 +12,7 @@
         }
     ],
     "routes": [
-        { "src": "/api/(.*)", "dest": "/server/survey_app/wsgi.py" },
+        { "src": "/api/(.*)", "dest": "/backend/core/wsgi.py" },
         { "src": "/(.*)", "dest": "/client/$1" }
     ]
 }
