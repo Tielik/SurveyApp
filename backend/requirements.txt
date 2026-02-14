@@ -1,8 +1,10 @@
-﻿asgiref==3.11.0
-Django==6.0
-django-cors-headers==4.9.0
-djangorestframework==3.16.1
-pillow==12.0.0
-sqlparse==0.5.4
-tzdata==2025.2
+asgiref
+Django
+django-cors-headers
+djangorestframework
+pillow
+sqlparse
+tzdata
 psycopg2-binary
+whitenoise
+gunicorn
