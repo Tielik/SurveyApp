@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-sg+wt7*ke326t%8$@aca3j08u=6+jk22c=f(nio6!5)gv-7(7o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost']
 
 RECAPTCHA_SECRET_KEY = os.environ.get("RECAPTCHA_SECRET_KEY", "6LcGxj0sAAAAAIeStlUgGrYu9zu7VmRkCw5kORXZ")
 
