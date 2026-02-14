@@ -1,24 +1,18 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "backend/core/wsgi.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/core/wsgi.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
-    }
-  ]
+    "version": 2,
+    "builds": [
+        {
+            "src": "server/survey_app/wsgi.py", 
+            "use": "@vercel/python"
+        },
+        {
+            "src": "client/package.json",
+            "use": "@vercel/static-build",
+            "config": { "distDir": "dist" }
+        }
+    ],
+    "routes": [
+        { "src": "/api/(.*)", "dest": "/server/survey_app/wsgi.py" },
+        { "src": "/(.*)", "dest": "/client/$1" }
+    ]
 }
